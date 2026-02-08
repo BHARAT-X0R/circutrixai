@@ -37,33 +37,59 @@ export function generateCEAmplifier(): CircuitSpec {
       bandwidth: "100Hz – 100kHz",
     },
     components: [
-      { id: "vcc", type: "voltage_source", label: "Vcc", value: "12", unit: "V", x: 400, y: 40 },
-      { id: "r1", type: "resistor", label: "R1", value: "82", unit: "kΩ", x: 200, y: 120, power: Math.pow(Vcc - Vb, 2) / R1_actual },
-      { id: "r2", type: "resistor", label: "R2", value: "12", unit: "kΩ", x: 200, y: 280, power: Math.pow(Vb, 2) / R2_actual },
-      { id: "rc", type: "resistor", label: "RC", value: "4.7", unit: "kΩ", x: 400, y: 120, power: Math.pow(Ic, 2) * Rc_actual },
-      { id: "re", type: "resistor", label: "RE", value: "470", unit: "Ω", x: 400, y: 320, power: Math.pow(Ic, 2) * Re },
-      { id: "q1", type: "transistor", label: "Q1", value: "2N2222", unit: "", x: 350, y: 220 },
-      { id: "c1", type: "capacitor", label: "C1", value: "1.6", unit: "μF", x: 100, y: 200 },
-      { id: "c2", type: "capacitor", label: "C2", value: "0.16", unit: "μF", x: 520, y: 200 },
-      { id: "ce", type: "capacitor", label: "CE", value: "3.4", unit: "μF", x: 480, y: 320 },
-      { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 300, y: 420 },
+      { id: "vcc", type: "voltage_source", label: "Vcc", value: "12", unit: "V", x: 325, y: 45 },
+      { id: "r1", type: "resistor", label: "R1", value: "82", unit: "kΩ", x: 170, y: 130, power: Math.pow(Vcc - Vb, 2) / R1_actual },
+      { id: "r2", type: "resistor", label: "R2", value: "12", unit: "kΩ", x: 170, y: 300, power: Math.pow(Vb, 2) / R2_actual },
+      { id: "rc", type: "resistor", label: "RC", value: "4.7", unit: "kΩ", x: 325, y: 130, power: Math.pow(Ic, 2) * Rc_actual },
+      { id: "re", type: "resistor", label: "RE", value: "470", unit: "Ω", x: 325, y: 340, power: Math.pow(Ic, 2) * Re },
+      { id: "q1", type: "transistor", label: "Q1", value: "2N2222", unit: "", x: 310, y: 230 },
+      { id: "c1", type: "capacitor", label: "C1", value: "1.6", unit: "μF", x: 90, y: 215 },
+      { id: "c2", type: "capacitor", label: "C2", value: "0.16", unit: "μF", x: 480, y: 165 },
+      { id: "ce", type: "capacitor", label: "CE", value: "3.4", unit: "μF", x: 420, y: 340 },
+      { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 325, y: 430 },
     ],
     nodes: [
-      { id: "n_vcc", label: "Vcc", x: 400, y: 40, voltage: 12, type: "supply" },
-      { id: "n_base", label: "Base", x: 300, y: 200, voltage: parseFloat(Vb.toFixed(2)), type: "internal" },
-      { id: "n_collector", label: "Collector", x: 400, y: 170, voltage: parseFloat(Vc.toFixed(2)), type: "internal" },
-      { id: "n_emitter", label: "Emitter", x: 400, y: 280, voltage: parseFloat(Ve.toFixed(2)), type: "internal" },
-      { id: "n_input", label: "Vin", x: 50, y: 200, voltage: 0, type: "input" },
-      { id: "n_output", label: "Vout", x: 580, y: 170, voltage: parseFloat(Vc.toFixed(2)), type: "output" },
-      { id: "n_gnd", label: "GND", x: 300, y: 420, voltage: 0, type: "ground" },
+      { id: "n_vcc", label: "Vcc", x: 325, y: 45, voltage: 12, type: "supply" },
+      { id: "n_base", label: "Base", x: 250, y: 215, voltage: parseFloat(Vb.toFixed(2)), type: "internal" },
+      { id: "n_collector", label: "Collector", x: 325, y: 165, voltage: parseFloat(Vc.toFixed(2)), type: "internal" },
+      { id: "n_emitter", label: "Emitter", x: 325, y: 290, voltage: parseFloat(Ve.toFixed(2)), type: "internal" },
+      { id: "n_input", label: "Vin", x: 40, y: 215, voltage: 0, type: "input" },
+      { id: "n_output", label: "Vout", x: 560, y: 165, voltage: parseFloat(Vc.toFixed(2)), type: "output" },
+      { id: "n_gnd", label: "GND", x: 325, y: 430, voltage: 0, type: "ground" },
     ],
     connections: [
-      { from: "n_vcc", to: "n_collector", current: Ic * 1000, path: [{ x: 400, y: 40 }, { x: 400, y: 170 }] },
-      { from: "n_collector", to: "n_output", current: 0, path: [{ x: 400, y: 170 }, { x: 580, y: 170 }] },
-      { from: "n_vcc", to: "n_base", current: I_divider * 1000, path: [{ x: 400, y: 40 }, { x: 200, y: 40 }, { x: 200, y: 200 }, { x: 300, y: 200 }] },
-      { from: "n_base", to: "n_gnd", current: I_divider * 1000, path: [{ x: 200, y: 200 }, { x: 200, y: 420 }, { x: 300, y: 420 }] },
-      { from: "n_emitter", to: "n_gnd", current: Ic * 1000, path: [{ x: 400, y: 280 }, { x: 400, y: 420 }, { x: 300, y: 420 }] },
-      { from: "n_input", to: "n_base", current: 0, path: [{ x: 50, y: 200 }, { x: 300, y: 200 }] },
+      // Vcc rail down to R1 top and Rc top
+      { from: "n_vcc", to: "rc", current: Ic * 1000, path: [{ x: 325, y: 45 }, { x: 325, y: 100 }] },
+      { from: "n_vcc", to: "r1", current: I_divider * 1000, path: [{ x: 325, y: 45 }, { x: 170, y: 45 }, { x: 170, y: 100 }] },
+      // Rc bottom to collector
+      { from: "rc", to: "n_collector", current: Ic * 1000, path: [{ x: 325, y: 155 }, { x: 325, y: 165 }] },
+      // Collector to transistor top (C pin)
+      { from: "n_collector", to: "q1_c", current: Ic * 1000, path: [{ x: 325, y: 165 }, { x: 325, y: 210 }] },
+      // Transistor emitter (E pin) to emitter node
+      { from: "q1_e", to: "n_emitter", current: Ic * 1000, path: [{ x: 325, y: 250 }, { x: 325, y: 290 }] },
+      // Emitter to RE top
+      { from: "n_emitter", to: "re", current: Ic * 1000, path: [{ x: 325, y: 290 }, { x: 325, y: 315 }] },
+      // RE bottom to GND
+      { from: "re", to: "n_gnd", current: Ic * 1000, path: [{ x: 325, y: 365 }, { x: 325, y: 430 }] },
+      // R1 bottom to base node
+      { from: "r1", to: "n_base", current: I_divider * 1000, path: [{ x: 170, y: 155 }, { x: 170, y: 215 }, { x: 250, y: 215 }] },
+      // Base node to transistor base (B pin)
+      { from: "n_base", to: "q1_b", current: Ic / beta * 1000, path: [{ x: 250, y: 215 }, { x: 285, y: 215 }] },
+      // Base junction down to R2 top
+      { from: "n_base", to: "r2", current: I_divider * 1000, path: [{ x: 170, y: 215 }, { x: 170, y: 275 }] },
+      // R2 bottom to GND
+      { from: "r2", to: "n_gnd", current: I_divider * 1000, path: [{ x: 170, y: 325 }, { x: 170, y: 430 }, { x: 325, y: 430 }] },
+      // Input through C1 to base
+      { from: "n_input", to: "c1", current: 0, path: [{ x: 40, y: 215 }, { x: 75, y: 215 }] },
+      { from: "c1", to: "n_base", current: 0, path: [{ x: 105, y: 215 }, { x: 170, y: 215 }] },
+      // Collector to C2 to output
+      { from: "n_collector", to: "c2", current: 0, path: [{ x: 325, y: 165 }, { x: 465, y: 165 }] },
+      { from: "c2", to: "n_output", current: 0, path: [{ x: 495, y: 165 }, { x: 560, y: 165 }] },
+      // CE bypass cap: emitter node to GND via CE
+      { from: "n_emitter", to: "ce", current: 0, path: [{ x: 325, y: 290 }, { x: 420, y: 290 }, { x: 420, y: 315 }] },
+      { from: "ce", to: "n_gnd", current: 0, path: [{ x: 420, y: 365 }, { x: 420, y: 430 }, { x: 325, y: 430 }] },
+      // GND rail
+      { from: "n_gnd", to: "gnd", current: 0, path: [{ x: 325, y: 430 }, { x: 325, y: 430 }] },
     ],
     analysis: {
       dcOperatingPoint: [
