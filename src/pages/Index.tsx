@@ -30,7 +30,7 @@ const Index = () => {
         opacity: 1
       }} exit={{
         opacity: 0
-      }} className="min-h-screen flex items-center justify-center px-4 bg-orange-100">
+      }} className="min-h-screen flex items-center justify-center px-4 bg-slate-400">
             <PromptEditor onSubmit={handleSubmit} />
           </motion.div> : isProcessing ? <motion.div key="processing" initial={{
         opacity: 0
