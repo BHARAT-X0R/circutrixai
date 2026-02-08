@@ -4,12 +4,10 @@ import PromptEditor from "@/components/PromptEditor";
 import CircuitResultView from "@/components/CircuitResultView";
 import { generateCEAmplifier } from "@/lib/circuit-engine";
 import { CircuitSpec } from "@/types/circuit";
-
 const Index = () => {
   const [circuit, setCircuit] = useState<CircuitSpec | null>(null);
   const [prompt, setPrompt] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-
   const handleSubmit = (text: string) => {
     setPrompt(text);
     setIsProcessing(true);
@@ -20,33 +18,27 @@ const Index = () => {
       setIsProcessing(false);
     }, 1500);
   };
-
   const handleBack = () => {
     setCircuit(null);
     setPrompt("");
   };
-
-  return (
-    <div className="min-h-screen bg-background blueprint-grid-lg">
+  return <div className="min-h-screen bg-background blueprint-grid-lg">
       <AnimatePresence mode="wait">
-        {!circuit && !isProcessing ? (
-          <motion.div
-            key="prompt"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="min-h-screen flex items-center justify-center px-4"
-          >
+        {!circuit && !isProcessing ? <motion.div key="prompt" initial={{
+        opacity: 0
+      }} animate={{
+        opacity: 1
+      }} exit={{
+        opacity: 0
+      }} className="min-h-screen flex items-center justify-center px-4 bg-orange-100">
             <PromptEditor onSubmit={handleSubmit} />
-          </motion.div>
-        ) : isProcessing ? (
-          <motion.div
-            key="processing"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="min-h-screen flex items-center justify-center"
-          >
+          </motion.div> : isProcessing ? <motion.div key="processing" initial={{
+        opacity: 0
+      }} animate={{
+        opacity: 1
+      }} exit={{
+        opacity: 0
+      }} className="min-h-screen flex items-center justify-center">
             <div className="text-center space-y-4">
               <div className="relative w-16 h-16 mx-auto">
                 <div className="absolute inset-0 rounded-full border-2 border-primary/20" />
@@ -59,20 +51,16 @@ const Index = () => {
                 Parsing intent → Selecting template → Computing values → Validating
               </p>
             </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="result"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
+          </motion.div> : <motion.div key="result" initial={{
+        opacity: 0
+      }} animate={{
+        opacity: 1
+      }} exit={{
+        opacity: 0
+      }}>
             <CircuitResultView circuit={circuit!} prompt={prompt} onBack={handleBack} />
-          </motion.div>
-        )}
+          </motion.div>}
       </AnimatePresence>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
