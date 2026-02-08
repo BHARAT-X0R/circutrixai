@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import PromptEditor from "@/components/PromptEditor";
 import CircuitResultView from "@/components/CircuitResultView";
-import { generateCEAmplifier } from "@/lib/circuit-engine";
+import { synthesizeCircuit } from "@/lib/circuit-engine";
 import { CircuitSpec } from "@/types/circuit";
 const Index = () => {
   const [circuit, setCircuit] = useState<CircuitSpec | null>(null);
@@ -14,7 +14,7 @@ const Index = () => {
 
     // Simulate processing delay
     setTimeout(() => {
-      setCircuit(generateCEAmplifier());
+      setCircuit(synthesizeCircuit(text));
       setIsProcessing(false);
     }, 1500);
   };
