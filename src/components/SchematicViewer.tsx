@@ -91,6 +91,28 @@ const SchematicViewer: React.FC<SchematicViewerProps> = ({ circuit, showFlow }) 
                   <line x1="-4" y1="8" x2="4" y2="8" stroke={color} strokeWidth="1.5" />
                 </g>
               )}
+              {comp.type === "opamp" && (
+                <g transform={`translate(${comp.x}, ${comp.y})`}>
+                  <polygon points="-20,-25 -20,25 25,0" fill="none" stroke={color} strokeWidth="1.5" />
+                  <text x="-14" y="-8" fontSize="10" fill={color} fontFamily="monospace">−</text>
+                  <text x="-14" y="12" fontSize="10" fill={color} fontFamily="monospace">+</text>
+                </g>
+              )}
+              {comp.type === "inductor" && (
+                <g transform={`translate(${comp.x}, ${comp.y})`}>
+                  <path d="M-15,0 C-12,-8 -6,-8 -3,0 C0,-8 6,-8 9,0 C12,-8 18,-8 21,0" fill="none" stroke={color} strokeWidth="1.5" />
+                  <line x1="-15" y1="0" x2="-25" y2="0" stroke={color} strokeWidth="1.5" />
+                  <line x1="21" y1="0" x2="31" y2="0" stroke={color} strokeWidth="1.5" />
+                </g>
+              )}
+              {comp.type === "diode" && (
+                <g transform={`translate(${comp.x}, ${comp.y})`}>
+                  <polygon points="-6,-8 -6,8 6,0" fill="none" stroke={color} strokeWidth="1.5" />
+                  <line x1="6" y1="-8" x2="6" y2="8" stroke={color} strokeWidth="1.5" />
+                  <line x1="-6" y1="0" x2="-15" y2="0" stroke={color} strokeWidth="1.5" />
+                  <line x1="6" y1="0" x2="15" y2="0" stroke={color} strokeWidth="1.5" />
+                </g>
+              )}
               {/* Label */}
               <text
                 x={comp.x}
