@@ -1,5 +1,12 @@
 import { CircuitSpec } from "@/types/circuit";
 import { ParsedIntent } from "@/lib/circuit-parser";
+import { round, nearestStandard, formatResistance, formatResUnit, formatCapacitance, formatCapUnit } from "./circuit-utils";
+
+// Import extended generators
+import { generateHalfWaveRectifier, generateBridgeRectifier, generateSeriesClipper, generatePositiveClamper, generateNegativeClamper } from "./circuit-gen-diode";
+import { generateVoltageFollower, generateSummingAmplifier, generateIntegrator, generateDifferentiator } from "./circuit-gen-opamp-ext";
+import { generateBandPassFilter, generateActiveLowPass, generateActiveHighPass, generateWienBridge, generateMonostable555 } from "./circuit-gen-filter-ext";
+import { generateCommonBase, generateDarlingtonPair } from "./circuit-gen-transistor-ext";
 
 export function generateCircuit(intent: ParsedIntent): CircuitSpec {
   switch (intent.circuitType) {
@@ -7,18 +14,50 @@ export function generateCircuit(intent: ParsedIntent): CircuitSpec {
       return generateCEAmplifier(intent.params);
     case "cc_amplifier":
       return generateCCAmplifier(intent.params);
+    case "cb_amplifier":
+      return generateCommonBase(intent.params);
+    case "darlington_pair":
+      return generateDarlingtonPair(intent.params);
     case "voltage_divider":
       return generateVoltageDivider(intent.params);
     case "inverting_opamp":
       return generateInvertingOpamp(intent.params);
     case "non_inverting_opamp":
       return generateNonInvertingOpamp(intent.params);
+    case "voltage_follower_opamp":
+      return generateVoltageFollower(intent.params);
+    case "summing_amplifier":
+      return generateSummingAmplifier(intent.params);
+    case "integrator_opamp":
+      return generateIntegrator(intent.params);
+    case "differentiator_opamp":
+      return generateDifferentiator(intent.params);
     case "rc_low_pass":
       return generateRCLowPass(intent.params);
     case "rc_high_pass":
       return generateRCHighPass(intent.params);
+    case "band_pass_filter":
+      return generateBandPassFilter(intent.params);
+    case "active_low_pass":
+      return generateActiveLowPass(intent.params);
+    case "active_high_pass":
+      return generateActiveHighPass(intent.params);
     case "astable_multivibrator":
       return generateAstable(intent.params);
+    case "monostable_555":
+      return generateMonostable555(intent.params);
+    case "wien_bridge_oscillator":
+      return generateWienBridge(intent.params);
+    case "half_wave_rectifier":
+      return generateHalfWaveRectifier(intent.params);
+    case "bridge_rectifier":
+      return generateBridgeRectifier(intent.params);
+    case "series_clipper":
+      return generateSeriesClipper(intent.params);
+    case "positive_clamper":
+      return generatePositiveClamper(intent.params);
+    case "negative_clamper":
+      return generateNegativeClamper(intent.params);
     default:
       return generateCEAmplifier(intent.params);
   }
@@ -109,8 +148,7 @@ function generateCEAmplifier(p: Record<string, number | string>): CircuitSpec {
 function generateVoltageDivider(p: Record<string, number | string>): CircuitSpec {
   const Vin = Number(p.Vin) || 12;
   const Vout = Number(p.Vout) || 5;
-  const Iload = (Number(p.Iload) || 1) / 1000; // mA to A
-  const ratio = Vout / Vin;
+  const Iload = (Number(p.Iload) || 1) / 1000;
   const R2 = Vout / (Iload * 10);
   const R1 = (Vin - Vout) / (Vout / R2 + Iload);
   const R1v = nearestStandard(R1);
@@ -152,7 +190,7 @@ function generateVoltageDivider(p: Record<string, number | string>): CircuitSpec
       powerDissipation: round(Ptotal),
       calculations: [
         { title: "Output Voltage", formula: "Vout = Vin × R2 / (R1 + R2)", substitution: `${Vin} × ${R2v} / (${R1v} + ${R2v})`, result: `Vout = ${Vout_actual.toFixed(2)} V`, explanation: "Unloaded output voltage from resistive divider." },
-        { title: "R2 Selection", formula: "R2 = Vout / (10 × Iload)", substitution: `${Vout} / (10 × ${(Iload*1000).toFixed(1)}mA)`, result: `R2 ≈ ${formatResistance(R2v)} ${formatResUnit(R2v)}`, explanation: "R2 chosen so divider current ≈ 10× load current for regulation." },
+        { title: "R2 Selection", formula: "R2 = Vout / (10 × Iload)", substitution: `${Vout} / (10 × ${(Iload*1000).toFixed(1)}mA)`, result: `R2 ≈ ${formatResistance(R2v)} ${formatResUnit(R2v)}`, explanation: "R2 chosen so divider current ≈ 10× load current." },
         { title: "R1 Selection", formula: "R1 = (Vin - Vout) / I_divider", substitution: `(${Vin} - ${Vout}) / ${((Vin/(R1v+R2v))*1000).toFixed(2)}mA`, result: `R1 ≈ ${formatResistance(R1v)} ${formatResUnit(R1v)}`, explanation: "R1 drops the remaining voltage." },
       ],
     },
@@ -476,51 +514,4 @@ function generateAstable(p: Record<string, number | string>): CircuitSpec {
       ],
     },
   };
-}
-
-// ─── Utilities ───────────────────────────────────────────────
-function round(v: number, d = 2): number {
-  return parseFloat(v.toFixed(d));
-}
-
-const E24 = [1.0,1.1,1.2,1.3,1.5,1.6,1.8,2.0,2.2,2.4,2.7,3.0,3.3,3.6,3.9,4.3,4.7,5.1,5.6,6.2,6.8,7.5,8.2,9.1];
-
-function nearestStandard(value: number): number {
-  if (value <= 0) return 100;
-  const decade = Math.pow(10, Math.floor(Math.log10(value)));
-  const normalized = value / decade;
-  let best = E24[0];
-  let bestDiff = Math.abs(normalized - best);
-  for (const e of E24) {
-    const diff = Math.abs(normalized - e);
-    if (diff < bestDiff) { best = e; bestDiff = diff; }
-  }
-  // Also check next decade
-  const diff10 = Math.abs(normalized - 10);
-  if (diff10 < bestDiff) return 10 * decade;
-  return best * decade;
-}
-
-function formatResistance(r: number): string {
-  if (r >= 1e6) return (r / 1e6).toFixed(r % 1e6 === 0 ? 0 : 1);
-  if (r >= 1e3) return (r / 1e3).toFixed(r % 1e3 === 0 ? 0 : 1);
-  return r.toFixed(0);
-}
-
-function formatResUnit(r: number): string {
-  if (r >= 1e6) return "MΩ";
-  if (r >= 1e3) return "kΩ";
-  return "Ω";
-}
-
-function formatCapacitance(c: number): string {
-  if (c >= 1e-6) return (c * 1e6).toFixed(c * 1e6 >= 10 ? 0 : 1);
-  if (c >= 1e-9) return (c * 1e9).toFixed(0);
-  return (c * 1e12).toFixed(0);
-}
-
-function formatCapUnit(c: number): string {
-  if (c >= 1e-6) return "μF";
-  if (c >= 1e-9) return "nF";
-  return "pF";
 }
