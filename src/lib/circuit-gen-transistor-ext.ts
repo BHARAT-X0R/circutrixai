@@ -4,26 +4,57 @@ import { round, nearestStandard, formatResistance, formatResUnit } from "./circu
 // ─── Common Base Amplifier ───────────────────────────────────
 export function generateCommonBase(p: Record<string, number | string>): CircuitSpec {
   const Vcc = Number(p.Vcc) || 12;
+  const targetGain = Math.abs(Number(p.gain)) || 0; // 0 means auto
   const beta = 200;
   const Vbe = 0.7;
-  const Ic = 2e-3;
-  const Re = 560;
-  const Rc = 4700;
+  
+  // Design: Av = Rc / re, re = 26mV/Ic
+  // Set Vc ≈ Vcc/2 for max swing: Ic*Rc ≈ Vcc/2
+  // If gain specified: Rc = gain * re, then solve for Ic
+  let Ic: number;
+  let Rc_calc: number;
+  
+  if (targetGain > 0) {
+    // Ic = sqrt(Vcc / (0.052 * gain)) to center Vc
+    Ic = Math.sqrt(Vcc / (0.052 * targetGain));
+    Ic = Math.max(0.5e-3, Math.min(20e-3, Ic));
+    const re = 0.026 / Ic;
+    Rc_calc = targetGain * re;
+  } else {
+    Ic = 2e-3;
+    Rc_calc = Vcc * 0.4 / Ic; // Vc at 60% Vcc
+  }
+  
+  const Rc = nearestStandard(Rc_calc);
+  const re = 0.026 / Ic;
+  
+  // RE for DC stability: VE ≈ 10% Vcc
+  const Ve_target = Math.max(1, Vcc * 0.1);
+  const Re_calc = Ve_target / Ic;
+  const Re = nearestStandard(Re_calc);
+  
   const Ve = Ic * Re;
   const Vb = Ve + Vbe;
   const Vc = Vcc - Ic * Rc;
-  const re = 26 / (Ic * 1000);
   const Av = Rc / re;
   const I_divider = 10 * (Ic / beta);
-  const R1 = (Vcc - Vb) / I_divider;
-  const R2 = Vb / I_divider;
-  const R1v = nearestStandard(R1);
-  const R2v = nearestStandard(R2);
+  const R1_calc = (Vcc - Vb) / I_divider;
+  const R2_calc = Vb / I_divider;
+  const R1v = nearestStandard(R1_calc);
+  const R2v = nearestStandard(R2_calc);
+
+  // Actual values
+  const Vb_actual = Vcc * R2v / (R1v + R2v);
+  const Ve_actual = Vb_actual - Vbe;
+  const Ic_actual = Ve_actual / Re;
+  const re_actual = 0.026 / Ic_actual;
+  const Vc_actual = Vcc - Ic_actual * Rc;
+  const Av_actual = Rc / re_actual;
 
   return {
     type: "Common Base Amplifier",
     topology: "common_base",
-    parameters: { Vcc, gain: round(Av) },
+    parameters: { Vcc, gain: round(Av_actual) },
     components: [
       { id: "vcc", type: "voltage_source", label: "Vcc", value: String(Vcc), unit: "V", x: 325, y: 45 },
       { id: "rc", type: "resistor", label: "RC", value: formatResistance(Rc), unit: formatResUnit(Rc), x: 325, y: 130 },
@@ -38,20 +69,20 @@ export function generateCommonBase(p: Record<string, number | string>): CircuitS
     ],
     nodes: [
       { id: "n_vcc", label: "Vcc", x: 325, y: 45, voltage: Vcc, type: "supply" },
-      { id: "n_base", label: "Base", x: 250, y: 215, voltage: round(Vb), type: "internal" },
-      { id: "n_collector", label: "Collector", x: 325, y: 165, voltage: round(Vc), type: "internal" },
-      { id: "n_emitter", label: "Emitter", x: 325, y: 290, voltage: round(Ve), type: "internal" },
+      { id: "n_base", label: "Base", x: 250, y: 215, voltage: round(Vb_actual), type: "internal" },
+      { id: "n_collector", label: "Collector", x: 325, y: 165, voltage: round(Vc_actual), type: "internal" },
+      { id: "n_emitter", label: "Emitter", x: 325, y: 290, voltage: round(Ve_actual), type: "internal" },
       { id: "n_input", label: "Vin", x: 580, y: 340, voltage: 0, type: "input" },
-      { id: "n_output", label: "Vout", x: 580, y: 165, voltage: round(Vc), type: "output" },
+      { id: "n_output", label: "Vout", x: 580, y: 165, voltage: round(Vc_actual), type: "output" },
       { id: "n_gnd", label: "GND", x: 325, y: 430, voltage: 0, type: "ground" },
     ],
     connections: [
-      { from: "n_vcc", to: "rc", current: round(Ic * 1000), path: [{ x: 325, y: 45 }, { x: 325, y: 105 }] },
-      { from: "rc", to: "n_collector", current: round(Ic * 1000), path: [{ x: 325, y: 155 }, { x: 325, y: 165 }] },
-      { from: "n_collector", to: "q1", current: round(Ic * 1000), path: [{ x: 325, y: 165 }, { x: 325, y: 210 }] },
-      { from: "q1", to: "n_emitter", current: round(Ic * 1000), path: [{ x: 325, y: 250 }, { x: 325, y: 290 }] },
-      { from: "n_emitter", to: "re", current: round(Ic * 1000), path: [{ x: 325, y: 290 }, { x: 325, y: 315 }] },
-      { from: "re", to: "n_gnd", current: round(Ic * 1000), path: [{ x: 325, y: 365 }, { x: 325, y: 430 }] },
+      { from: "n_vcc", to: "rc", current: round(Ic_actual * 1000), path: [{ x: 325, y: 45 }, { x: 325, y: 105 }] },
+      { from: "rc", to: "n_collector", current: round(Ic_actual * 1000), path: [{ x: 325, y: 155 }, { x: 325, y: 165 }] },
+      { from: "n_collector", to: "q1", current: round(Ic_actual * 1000), path: [{ x: 325, y: 165 }, { x: 325, y: 210 }] },
+      { from: "q1", to: "n_emitter", current: round(Ic_actual * 1000), path: [{ x: 325, y: 250 }, { x: 325, y: 290 }] },
+      { from: "n_emitter", to: "re", current: round(Ic_actual * 1000), path: [{ x: 325, y: 290 }, { x: 325, y: 315 }] },
+      { from: "re", to: "n_gnd", current: round(Ic_actual * 1000), path: [{ x: 325, y: 365 }, { x: 325, y: 430 }] },
       { from: "n_vcc", to: "r1", current: round(I_divider * 1000), path: [{ x: 325, y: 45 }, { x: 170, y: 45 }, { x: 170, y: 105 }] },
       { from: "r1", to: "n_base", current: round(I_divider * 1000), path: [{ x: 170, y: 155 }, { x: 170, y: 215 }, { x: 250, y: 215 }] },
       { from: "n_base", to: "r2", current: round(I_divider * 1000), path: [{ x: 170, y: 215 }, { x: 170, y: 275 }] },
@@ -66,22 +97,23 @@ export function generateCommonBase(p: Record<string, number | string>): CircuitS
     analysis: {
       dcOperatingPoint: [
         { node: "Vcc", voltage: Vcc, unit: "V" },
-        { node: "V(Base)", voltage: round(Vb), unit: "V" },
-        { node: "V(Collector)", voltage: round(Vc), unit: "V" },
-        { node: "V(Emitter)", voltage: round(Ve), unit: "V" },
-        { node: "Ic", voltage: round(Ic * 1000), unit: "mA" },
+        { node: "V(Base)", voltage: round(Vb_actual), unit: "V" },
+        { node: "V(Collector)", voltage: round(Vc_actual), unit: "V" },
+        { node: "V(Emitter)", voltage: round(Ve_actual), unit: "V" },
+        { node: "Ic", voltage: round(Ic_actual * 1000), unit: "mA" },
       ],
-      voltageGain: round(Av),
+      voltageGain: round(Av_actual),
       currentGain: 1,
-      inputImpedance: round(re),
+      inputImpedance: round(re_actual),
       outputImpedance: Rc,
-      powerDissipation: round(Vcc * Ic),
+      powerDissipation: round(Vcc * Ic_actual),
       bandwidth: { low: 100, high: 500000, unit: "Hz" },
       calculations: [
-        { title: "Voltage Gain", formula: "Av = RC / re", substitution: `${Rc} / ${re.toFixed(1)}`, result: `Av = ${Av.toFixed(1)}`, explanation: "High voltage gain, non-inverting output." },
+        { title: "Collector Current", formula: "Ic = VE / RE", substitution: `${Ve_actual.toFixed(2)}V / ${formatResistance(Re)}${formatResUnit(Re)}`, result: `Ic = ${(Ic_actual * 1000).toFixed(2)} mA`, explanation: "Set by bias point for desired gain." },
+        { title: "Voltage Gain", formula: "Av = RC / re", substitution: `${formatResistance(Rc)}${formatResUnit(Rc)} / ${re_actual.toFixed(1)}Ω`, result: `Av = ${Av_actual.toFixed(1)}`, explanation: "High voltage gain, non-inverting output." },
         { title: "Current Gain", formula: "Ai ≈ 1 (α)", substitution: "α = β / (β + 1)", result: `Ai ≈ ${(beta / (beta + 1)).toFixed(3)}`, explanation: "Current gain is approximately unity." },
-        { title: "Input Impedance", formula: "Zin ≈ re = 26mV / Ic", substitution: `26 / ${(Ic * 1000).toFixed(1)}`, result: `Zin = ${re.toFixed(1)} Ω`, explanation: "Very low input impedance — characteristic of CB." },
-        { title: "Bandwidth", formula: "Wide bandwidth (no Miller effect)", substitution: "fT not reduced by Av", result: "BW ≈ 100Hz – 500kHz", explanation: "Common base avoids Miller capacitance multiplication." },
+        { title: "Input Impedance", formula: "Zin ≈ re = 26mV / Ic", substitution: `26 / ${(Ic_actual * 1000).toFixed(1)}`, result: `Zin = ${re_actual.toFixed(1)} Ω`, explanation: "Very low input impedance — characteristic of CB." },
+        { title: "Bias Resistors", formula: "R1, R2 from voltage divider", substitution: `VB = ${Vb_actual.toFixed(2)}V, I_div = ${(I_divider*1000).toFixed(3)}mA`, result: `R1 = ${formatResistance(R1v)}${formatResUnit(R1v)}, R2 = ${formatResistance(R2v)}${formatResUnit(R2v)}`, explanation: "Stiff divider for stable bias point." },
       ],
     },
   };
