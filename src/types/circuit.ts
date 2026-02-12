@@ -36,6 +36,12 @@ export interface CircuitConnection {
   path: { x: number; y: number }[];
 }
 
+export interface FrequencyResponsePoint {
+  frequency: number;
+  gainDb: number;
+  phaseDeg: number;
+}
+
 export interface CircuitAnalysis {
   dcOperatingPoint: { node: string; voltage: number; unit: string }[];
   voltageGain?: number;
@@ -45,6 +51,10 @@ export interface CircuitAnalysis {
   outputImpedance?: number;
   powerDissipation: number;
   calculations: CalculationStep[];
+  frequencyResponse?: FrequencyResponsePoint[];
+  gainBandwidthProduct?: number;
+  cutoffFrequency?: number;
+  rolloffRate?: number;
 }
 
 export interface CalculationStep {

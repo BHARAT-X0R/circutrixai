@@ -1,6 +1,7 @@
 import { CircuitSpec } from "@/types/circuit";
 import { ParsedIntent } from "@/lib/circuit-parser";
 import { round, nearestStandard, formatResistance, formatResUnit, formatCapacitance, formatCapUnit } from "./circuit-utils";
+import { generateAmplifierResponse, generateOpAmpResponse, generateLowPassResponse, generateHighPassResponse } from "./frequency-response";
 
 // Import extended generators
 import { generateHalfWaveRectifier, generateBridgeRectifier, generateSeriesClipper, generatePositiveClamper, generateNegativeClamper } from "./circuit-gen-diode";
@@ -135,6 +136,9 @@ function generateCEAmplifier(p: Record<string, number | string>): CircuitSpec {
       outputImpedance: Rc_actual,
       powerDissipation: round(Vcc * Ic * 1.2),
       bandwidth: { low: 100, high: 100000, unit: "Hz" },
+      frequencyResponse: generateAmplifierResponse(20 * Math.log10(Rc_actual / (26 / (Ic * 1000))), 100, 100000),
+      cutoffFrequency: 100000,
+      rolloffRate: -20,
       calculations: [
         { title: "Collector Current (Ic)", formula: "Ic = Vcc × 0.4 / Rc", substitution: `${Vcc} × 0.4 / 4700`, result: `Ic ≈ ${(Ic * 1000).toFixed(2)} mA`, explanation: "Quiescent current for class-A operation." },
         { title: "Base Voltage (Vb)", formula: "Vb = Ic × Re + Vbe", substitution: `${(Ic*1000).toFixed(2)}mA × 470Ω + 0.7V`, result: `Vb = ${Vb.toFixed(2)} V`, explanation: "Set by voltage divider R1-R2." },
@@ -242,6 +246,10 @@ function generateInvertingOpamp(p: Record<string, number | string>): CircuitSpec
       outputImpedance: 0,
       powerDissipation: 0,
       bandwidth: { low: 0, high: round(1e6 / actualGain), unit: "Hz" },
+      frequencyResponse: generateOpAmpResponse(-actualGain, 1e6),
+      gainBandwidthProduct: 1e6,
+      cutoffFrequency: round(1e6 / actualGain),
+      rolloffRate: -20,
       calculations: [
         { title: "Voltage Gain", formula: "Av = -Rf / Rin", substitution: `Av = -${Rfv} / ${Rin}`, result: `Av = ${(-actualGain).toFixed(1)}`, explanation: "Gain set by feedback and input resistor ratio." },
         { title: "Feedback Resistor", formula: "Rf = |Av| × Rin", substitution: `Rf = ${gain} × ${Rin}`, result: `Rf = ${formatResistance(Rfv)} ${formatResUnit(Rfv)}`, explanation: "Selected nearest standard value." },
@@ -296,6 +304,10 @@ function generateNonInvertingOpamp(p: Record<string, number | string>): CircuitS
       outputImpedance: 0,
       powerDissipation: 0,
       bandwidth: { low: 0, high: round(1e6 / actualGain), unit: "Hz" },
+      frequencyResponse: generateOpAmpResponse(actualGain, 1e6),
+      gainBandwidthProduct: 1e6,
+      cutoffFrequency: round(1e6 / actualGain),
+      rolloffRate: -20,
       calculations: [
         { title: "Voltage Gain", formula: "Av = 1 + Rf / R1", substitution: `Av = 1 + ${Rfv} / ${R1}`, result: `Av = ${actualGain.toFixed(1)}`, explanation: "Non-inverting gain is always ≥ 1." },
         { title: "Feedback Resistor", formula: "Rf = (Av − 1) × R1", substitution: `Rf = (${gain} − 1) × ${R1}`, result: `Rf = ${formatResistance(Rfv)} ${formatResUnit(Rfv)}`, explanation: "Standard value selected." },
@@ -338,6 +350,9 @@ function generateRCLowPass(p: Record<string, number | string>): CircuitSpec {
       dcOperatingPoint: [{ node: "fc", voltage: round(fc_actual), unit: "Hz" }],
       powerDissipation: 0,
       bandwidth: { low: 0, high: round(fc_actual), unit: "Hz" },
+      frequencyResponse: generateLowPassResponse(0, fc_actual),
+      cutoffFrequency: round(fc_actual),
+      rolloffRate: -20,
       calculations: [
         { title: "Cutoff Frequency", formula: "fc = 1 / (2π × R × C)", substitution: `fc = 1 / (2π × ${Rv} × ${(C*1e9).toFixed(0)}nF)`, result: `fc = ${fc_actual.toFixed(0)} Hz`, explanation: "−3dB point of the filter." },
         { title: "Resistor Value", formula: "R = 1 / (2π × fc × C)", substitution: `R = 1 / (2π × ${fc} × ${(C*1e9).toFixed(0)}nF)`, result: `R ≈ ${formatResistance(Rv)} ${formatResUnit(Rv)}`, explanation: "Nearest standard resistor value selected." },
@@ -381,6 +396,9 @@ function generateRCHighPass(p: Record<string, number | string>): CircuitSpec {
       dcOperatingPoint: [{ node: "fc", voltage: round(fc_actual), unit: "Hz" }],
       powerDissipation: 0,
       bandwidth: { low: round(fc_actual), high: 1e9, unit: "Hz" },
+      frequencyResponse: generateHighPassResponse(0, fc_actual),
+      cutoffFrequency: round(fc_actual),
+      rolloffRate: -20,
       calculations: [
         { title: "Cutoff Frequency", formula: "fc = 1 / (2π × R × C)", substitution: `fc = 1 / (2π × ${Rv} × ${(C*1e9).toFixed(0)}nF)`, result: `fc = ${fc_actual.toFixed(0)} Hz`, explanation: "−3dB point of the high-pass filter." },
         { title: "Resistor Value", formula: "R = 1 / (2π × fc × C)", substitution: `R = 1 / (2π × ${fc} × ${(C*1e9).toFixed(0)}nF)`, result: `R ≈ ${formatResistance(Rv)} ${formatResUnit(Rv)}`, explanation: "Nearest standard resistor value selected." },
@@ -452,6 +470,9 @@ function generateCCAmplifier(p: Record<string, number | string>): CircuitSpec {
       inputImpedance: round(beta * Re),
       outputImpedance: round(26 / (Ic * 1000)),
       powerDissipation: round(Vcc * Ic),
+      frequencyResponse: generateAmplifierResponse(0, 50, 500000),
+      cutoffFrequency: 500000,
+      rolloffRate: -20,
       calculations: [
         { title: "Voltage Gain", formula: "Av ≈ 1 (unity)", substitution: "Emitter follower", result: "Av ≈ 1", explanation: "Output follows input with near-unity gain." },
         { title: "Output Impedance", formula: "Zout ≈ re = 26mV / Ic", substitution: `Zout = 26 / ${(Ic*1000).toFixed(1)}`, result: `Zout ≈ ${(26/(Ic*1000)).toFixed(1)} Ω`, explanation: "Very low output impedance — good for driving loads." },

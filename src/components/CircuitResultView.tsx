@@ -4,8 +4,9 @@ import { CircuitSpec } from "@/types/circuit";
 import SchematicViewer from "@/components/SchematicViewer";
 import AnalysisPanel from "@/components/AnalysisPanel";
 import CurrentFlowPanel from "@/components/CurrentFlowPanel";
+import FrequencyResponseChart from "@/components/FrequencyResponseChart";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Eye, EyeOff, FileDown, Cpu, Activity, Calculator } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, FileDown, Cpu, Activity, Calculator, BarChart3 } from "lucide-react";
 
 interface CircuitResultViewProps {
   circuit: CircuitSpec;
@@ -13,16 +14,19 @@ interface CircuitResultViewProps {
   onBack: () => void;
 }
 
-type ActiveTab = "schematic" | "analysis" | "flow";
+type ActiveTab = "schematic" | "analysis" | "flow" | "frequency";
 
 const CircuitResultView: React.FC<CircuitResultViewProps> = ({ circuit, prompt, onBack }) => {
   const [activeTab, setActiveTab] = useState<ActiveTab>("schematic");
   const [showFlow, setShowFlow] = useState(true);
 
+  const hasFreqResponse = !!circuit.analysis.frequencyResponse?.length;
+
   const tabs = [
     { id: "schematic" as const, label: "Schematic", icon: Cpu },
     { id: "flow" as const, label: "Current Flow", icon: Activity },
     { id: "analysis" as const, label: "Calculations", icon: Calculator },
+    ...(hasFreqResponse ? [{ id: "frequency" as const, label: "Freq Response", icon: BarChart3 }] : []),
   ];
 
   return (
@@ -157,6 +161,25 @@ const CircuitResultView: React.FC<CircuitResultViewProps> = ({ circuit, prompt, 
               className="max-w-2xl mx-auto"
             >
               <AnalysisPanel analysis={circuit.analysis} />
+            </motion.div>
+          )}
+
+          {activeTab === "frequency" && hasFreqResponse && (
+            <motion.div
+              key="frequency"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="max-w-3xl mx-auto"
+            >
+              <FrequencyResponseChart
+                data={circuit.analysis.frequencyResponse!}
+                cutoffFrequency={circuit.analysis.cutoffFrequency}
+                bandwidth={circuit.analysis.bandwidth}
+                gainBandwidthProduct={circuit.analysis.gainBandwidthProduct}
+                voltageGain={circuit.analysis.voltageGain}
+                rolloffRate={circuit.analysis.rolloffRate}
+              />
             </motion.div>
           )}
         </AnimatePresence>
