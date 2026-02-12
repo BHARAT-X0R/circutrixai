@@ -170,8 +170,9 @@ const rules: PatternRule[] = [
     patterns: [/common\s*base/i, /cb\s*amplifier/i, /grounded[\s-]?base/i],
     paramExtractors: {
       Vcc: /vcc\s*[-=:]?\s*(\d+\.?\d*)/i,
+      gain: /gain\s*[-=:]?\s*(\d+\.?\d*)/i,
     },
-    defaults: { Vcc: 12 },
+    defaults: { Vcc: 12, gain: 0 },
   },
   {
     type: "darlington_pair",

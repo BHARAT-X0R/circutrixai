@@ -67,55 +67,100 @@ export function generateCircuit(intent: ParsedIntent): CircuitSpec {
 // ─── CE Amplifier ────────────────────────────────────────────
 function generateCEAmplifier(p: Record<string, number | string>): CircuitSpec {
   const Vcc = Number(p.Vcc) || 12;
+  const targetGain = Math.abs(Number(p.gain)) || 50;
+  const RL = Number(p.RL) || 10000;
   const beta = 200;
   const Vbe = 0.7;
-  const Ic = 1e-3;
-  const Rc_actual = 4700;
-  const Re = 470;
+
+  // Design approach: Av = Rc / re (with bypassed RE)
+  // re = 26mV / Ic(mA) = VT / Ic
+  // Choose Ic so that Rc = targetGain * re fits within Vcc headroom
+  // Vc should be ~Vcc/2 for maximum output swing
+  // Vc = Vcc - Ic*Rc, and we want Vc ≈ Vcc/2
+  // So Ic*Rc ≈ Vcc/2 → Ic = Vcc / (2 * Rc)
+  // Also Rc = targetGain * re = targetGain * 0.026 / Ic
+  // Substituting: Ic = Vcc / (2 * targetGain * 0.026 / Ic)
+  // Ic² = Vcc / (2 * targetGain * 0.026)
+  // Ic = sqrt(Vcc / (0.052 * targetGain))
+  
+  let Ic = Math.sqrt(Vcc / (0.052 * targetGain));
+  // Clamp Ic to reasonable range (0.5mA to 20mA)
+  Ic = Math.max(0.5e-3, Math.min(20e-3, Ic));
+  
+  const re = 0.026 / Ic; // thermal voltage / Ic
+  const Rc_calc = targetGain * re;
+  const Rc = nearestStandard(Rc_calc);
+  
+  // RE for DC stability: VE ≈ 10% of Vcc (or at least 1V)
+  const Ve_target = Math.max(1, Vcc * 0.1);
+  const Re_calc = Ve_target / Ic;
+  const Re = nearestStandard(Re_calc);
+  
   const Ve = Ic * Re;
   const Vb = Ve + Vbe;
-  const I_divider = 10 * (Ic / beta);
-  const R1_actual = 82000;
-  const R2_actual = 12000;
-  const Vc = Vcc - Ic * Rc_actual;
+  const Vc = Vcc - Ic * Rc;
+  
+  // Voltage divider bias: I_divider >> Ib for stability
+  const Ib = Ic / beta;
+  const I_divider = 10 * Ib;
+  const R2_calc = Vb / I_divider;
+  const R1_calc = (Vcc - Vb) / I_divider;
+  const R1v = nearestStandard(R1_calc);
+  const R2v = nearestStandard(R2_calc);
+  
+  // Recalculate actual values with standard components
+  const Vb_actual = Vcc * R2v / (R1v + R2v);
+  const Ve_actual = Vb_actual - Vbe;
+  const Ic_actual = Ve_actual / Re;
+  const re_actual = 0.026 / Ic_actual;
+  const Vc_actual = Vcc - Ic_actual * Rc;
+  const actualGain = Rc / re_actual;
+  
+  // Coupling capacitor: Xc = R/10 at low freq (100Hz)
+  const fL = 100; // target lower -3dB
+  const C1_calc = 1 / (2 * Math.PI * fL * (R1v * R2v / (R1v + R2v))); // input coupling
+  const C2_calc = 1 / (2 * Math.PI * fL * RL); // output coupling
+  const Ce_calc = 1 / (2 * Math.PI * fL * re_actual); // bypass cap
+  
+  const actualBW_high = beta / (2 * Math.PI * Rc * 10e-12); // rough estimate with Cbc
 
   return {
     type: "Common Emitter Amplifier",
     topology: "voltage_divider_bias",
-    parameters: { Vcc, targetGain: Number(p.gain) || 50, loadResistance: Number(p.RL) || 10000, bandwidth: "100Hz – 100kHz" },
+    parameters: { Vcc, targetGain, loadResistance: RL, actualGain: round(actualGain), bandwidth: `${fL}Hz – ${round(actualBW_high > 1e6 ? actualBW_high / 1e6 : actualBW_high / 1e3)}${actualBW_high > 1e6 ? 'MHz' : 'kHz'}` },
     components: [
       { id: "vcc", type: "voltage_source", label: "Vcc", value: String(Vcc), unit: "V", x: 325, y: 45 },
-      { id: "r1", type: "resistor", label: "R1", value: "82", unit: "kΩ", x: 170, y: 130 },
-      { id: "r2", type: "resistor", label: "R2", value: "12", unit: "kΩ", x: 170, y: 300 },
-      { id: "rc", type: "resistor", label: "RC", value: "4.7", unit: "kΩ", x: 325, y: 130 },
-      { id: "re", type: "resistor", label: "RE", value: "470", unit: "Ω", x: 325, y: 340 },
+      { id: "r1", type: "resistor", label: "R1", value: formatResistance(R1v), unit: formatResUnit(R1v), x: 170, y: 130 },
+      { id: "r2", type: "resistor", label: "R2", value: formatResistance(R2v), unit: formatResUnit(R2v), x: 170, y: 300 },
+      { id: "rc", type: "resistor", label: "RC", value: formatResistance(Rc), unit: formatResUnit(Rc), x: 325, y: 130 },
+      { id: "re", type: "resistor", label: "RE", value: formatResistance(Re), unit: formatResUnit(Re), x: 325, y: 340 },
       { id: "q1", type: "transistor", label: "Q1", value: "2N2222", unit: "", x: 310, y: 230 },
-      { id: "c1", type: "capacitor", label: "C1", value: "1.6", unit: "μF", x: 90, y: 215 },
-      { id: "c2", type: "capacitor", label: "C2", value: "0.16", unit: "μF", x: 480, y: 165 },
-      { id: "ce", type: "capacitor", label: "CE", value: "3.4", unit: "μF", x: 420, y: 340 },
+      { id: "c1", type: "capacitor", label: "C1", value: formatCapacitance(C1_calc), unit: formatCapUnit(C1_calc), x: 90, y: 215 },
+      { id: "c2", type: "capacitor", label: "C2", value: formatCapacitance(C2_calc), unit: formatCapUnit(C2_calc), x: 480, y: 165 },
+      { id: "ce", type: "capacitor", label: "CE", value: formatCapacitance(Ce_calc), unit: formatCapUnit(Ce_calc), x: 420, y: 340 },
       { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 325, y: 430 },
     ],
     nodes: [
       { id: "n_vcc", label: "Vcc", x: 325, y: 45, voltage: Vcc, type: "supply" },
-      { id: "n_base", label: "Base", x: 250, y: 215, voltage: round(Vb), type: "internal" },
-      { id: "n_collector", label: "Collector", x: 325, y: 165, voltage: round(Vc), type: "internal" },
-      { id: "n_emitter", label: "Emitter", x: 325, y: 290, voltage: round(Ve), type: "internal" },
+      { id: "n_base", label: "Base", x: 250, y: 215, voltage: round(Vb_actual), type: "internal" },
+      { id: "n_collector", label: "Collector", x: 325, y: 165, voltage: round(Vc_actual), type: "internal" },
+      { id: "n_emitter", label: "Emitter", x: 325, y: 290, voltage: round(Ve_actual), type: "internal" },
       { id: "n_input", label: "Vin", x: 40, y: 215, voltage: 0, type: "input" },
-      { id: "n_output", label: "Vout", x: 560, y: 165, voltage: round(Vc), type: "output" },
+      { id: "n_output", label: "Vout", x: 560, y: 165, voltage: round(Vc_actual), type: "output" },
       { id: "n_gnd", label: "GND", x: 325, y: 430, voltage: 0, type: "ground" },
     ],
     connections: [
-      { from: "n_vcc", to: "rc", current: Ic * 1000, path: [{ x: 325, y: 45 }, { x: 325, y: 100 }] },
-      { from: "n_vcc", to: "r1", current: I_divider * 1000, path: [{ x: 325, y: 45 }, { x: 170, y: 45 }, { x: 170, y: 100 }] },
-      { from: "rc", to: "n_collector", current: Ic * 1000, path: [{ x: 325, y: 155 }, { x: 325, y: 165 }] },
-      { from: "n_collector", to: "q1_c", current: Ic * 1000, path: [{ x: 325, y: 165 }, { x: 325, y: 210 }] },
-      { from: "q1_e", to: "n_emitter", current: Ic * 1000, path: [{ x: 325, y: 250 }, { x: 325, y: 290 }] },
-      { from: "n_emitter", to: "re", current: Ic * 1000, path: [{ x: 325, y: 290 }, { x: 325, y: 315 }] },
-      { from: "re", to: "n_gnd", current: Ic * 1000, path: [{ x: 325, y: 365 }, { x: 325, y: 430 }] },
-      { from: "r1", to: "n_base", current: I_divider * 1000, path: [{ x: 170, y: 155 }, { x: 170, y: 215 }, { x: 250, y: 215 }] },
-      { from: "n_base", to: "q1_b", current: Ic / beta * 1000, path: [{ x: 250, y: 215 }, { x: 285, y: 215 }] },
-      { from: "n_base", to: "r2", current: I_divider * 1000, path: [{ x: 170, y: 215 }, { x: 170, y: 275 }] },
-      { from: "r2", to: "n_gnd", current: I_divider * 1000, path: [{ x: 170, y: 325 }, { x: 170, y: 430 }, { x: 325, y: 430 }] },
+      { from: "n_vcc", to: "rc", current: round(Ic_actual * 1000, 2), path: [{ x: 325, y: 45 }, { x: 325, y: 100 }] },
+      { from: "n_vcc", to: "r1", current: round(I_divider * 1000, 3), path: [{ x: 325, y: 45 }, { x: 170, y: 45 }, { x: 170, y: 100 }] },
+      { from: "rc", to: "n_collector", current: round(Ic_actual * 1000, 2), path: [{ x: 325, y: 155 }, { x: 325, y: 165 }] },
+      { from: "n_collector", to: "q1_c", current: round(Ic_actual * 1000, 2), path: [{ x: 325, y: 165 }, { x: 325, y: 210 }] },
+      { from: "q1_e", to: "n_emitter", current: round(Ic_actual * 1000, 2), path: [{ x: 325, y: 250 }, { x: 325, y: 290 }] },
+      { from: "n_emitter", to: "re", current: round(Ic_actual * 1000, 2), path: [{ x: 325, y: 290 }, { x: 325, y: 315 }] },
+      { from: "re", to: "n_gnd", current: round(Ic_actual * 1000, 2), path: [{ x: 325, y: 365 }, { x: 325, y: 430 }] },
+      { from: "r1", to: "n_base", current: round(I_divider * 1000, 3), path: [{ x: 170, y: 155 }, { x: 170, y: 215 }, { x: 250, y: 215 }] },
+      { from: "n_base", to: "q1_b", current: round(Ib * 1000, 4), path: [{ x: 250, y: 215 }, { x: 285, y: 215 }] },
+      { from: "n_base", to: "r2", current: round(I_divider * 1000, 3), path: [{ x: 170, y: 215 }, { x: 170, y: 275 }] },
+      { from: "r2", to: "n_gnd", current: round(I_divider * 1000, 3), path: [{ x: 170, y: 325 }, { x: 170, y: 430 }, { x: 325, y: 430 }] },
       { from: "n_input", to: "c1", current: 0, path: [{ x: 40, y: 215 }, { x: 75, y: 215 }] },
       { from: "c1", to: "n_base", current: 0, path: [{ x: 105, y: 215 }, { x: 170, y: 215 }] },
       { from: "n_collector", to: "c2", current: 0, path: [{ x: 325, y: 165 }, { x: 465, y: 165 }] },
@@ -126,23 +171,26 @@ function generateCEAmplifier(p: Record<string, number | string>): CircuitSpec {
     analysis: {
       dcOperatingPoint: [
         { node: "Vcc", voltage: Vcc, unit: "V" },
-        { node: "V(Base)", voltage: round(Vb), unit: "V" },
-        { node: "V(Collector)", voltage: round(Vc), unit: "V" },
-        { node: "V(Emitter)", voltage: round(Ve), unit: "V" },
-        { node: "Ic", voltage: Ic * 1000, unit: "mA" },
+        { node: "V(Base)", voltage: round(Vb_actual), unit: "V" },
+        { node: "V(Collector)", voltage: round(Vc_actual), unit: "V" },
+        { node: "V(Emitter)", voltage: round(Ve_actual), unit: "V" },
+        { node: "Ic", voltage: round(Ic_actual * 1000, 2), unit: "mA" },
       ],
-      voltageGain: round(Rc_actual / (26 / (Ic * 1000))),
-      inputImpedance: round((beta * 26) / (Ic * 1000)),
-      outputImpedance: Rc_actual,
-      powerDissipation: round(Vcc * Ic * 1.2),
-      bandwidth: { low: 100, high: 100000, unit: "Hz" },
-      frequencyResponse: generateAmplifierResponse(20 * Math.log10(Rc_actual / (26 / (Ic * 1000))), 100, 100000),
-      cutoffFrequency: 100000,
+      voltageGain: round(actualGain),
+      inputImpedance: round(beta * re_actual),
+      outputImpedance: Rc,
+      powerDissipation: round(Vcc * Ic_actual, 3),
+      bandwidth: { low: fL, high: round(Math.min(actualBW_high, 1e7)), unit: "Hz" },
+      frequencyResponse: generateAmplifierResponse(20 * Math.log10(actualGain), fL, Math.min(actualBW_high, 1e7)),
+      cutoffFrequency: round(Math.min(actualBW_high, 1e7)),
       rolloffRate: -20,
       calculations: [
-        { title: "Collector Current (Ic)", formula: "Ic = Vcc × 0.4 / Rc", substitution: `${Vcc} × 0.4 / 4700`, result: `Ic ≈ ${(Ic * 1000).toFixed(2)} mA`, explanation: "Quiescent current for class-A operation." },
-        { title: "Base Voltage (Vb)", formula: "Vb = Ic × Re + Vbe", substitution: `${(Ic*1000).toFixed(2)}mA × 470Ω + 0.7V`, result: `Vb = ${Vb.toFixed(2)} V`, explanation: "Set by voltage divider R1-R2." },
-        { title: "Voltage Gain (Av)", formula: "Av = -Rc / re", substitution: `Av = -4700 / ${(26/(Ic*1000)).toFixed(1)}`, result: `Av ≈ ${(Rc_actual / (26 / (Ic*1000))).toFixed(1)}`, explanation: "Small-signal gain with bypassed RE." },
+        { title: "Thermal Voltage re", formula: "re = VT / Ic = 26mV / Ic", substitution: `re = 26mV / ${(Ic_actual * 1000).toFixed(2)}mA`, result: `re = ${re_actual.toFixed(1)} Ω`, explanation: "Small-signal emitter resistance determines gain." },
+        { title: "Collector Resistor (Rc)", formula: "Rc = Av × re", substitution: `Rc = ${targetGain} × ${re_actual.toFixed(1)}Ω`, result: `Rc = ${formatResistance(Rc)} ${formatResUnit(Rc)} (E24)`, explanation: "Rc selected to achieve target voltage gain with bypassed RE." },
+        { title: "Emitter Resistor (RE)", formula: "RE = VE / Ic, VE ≈ 10% Vcc", substitution: `RE = ${Ve_target.toFixed(1)}V / ${(Ic_actual * 1000).toFixed(2)}mA`, result: `RE = ${formatResistance(Re)} ${formatResUnit(Re)}`, explanation: "RE provides DC stability; bypassed by CE for AC gain." },
+        { title: "Bias Resistors R1, R2", formula: "R2 = VB / I_div, R1 = (Vcc−VB) / I_div", substitution: `I_div = 10×Ib = ${(I_divider * 1000).toFixed(3)}mA`, result: `R1 = ${formatResistance(R1v)} ${formatResUnit(R1v)}, R2 = ${formatResistance(R2v)} ${formatResUnit(R2v)}`, explanation: "Stiff voltage divider (I_div >> Ib) for bias stability." },
+        { title: "Voltage Gain (Av)", formula: "Av = −Rc / re (bypassed RE)", substitution: `Av = −${formatResistance(Rc)}${formatResUnit(Rc)} / ${re_actual.toFixed(1)}Ω`, result: `Av ≈ ${actualGain.toFixed(1)}`, explanation: `Target gain: ${targetGain}, achieved: ${actualGain.toFixed(1)} (using E24 standard values).` },
+        { title: "DC Operating Point", formula: "Vc = Vcc − Ic×Rc", substitution: `Vc = ${Vcc} − ${(Ic_actual*1000).toFixed(2)}mA × ${formatResistance(Rc)}${formatResUnit(Rc)}`, result: `Vc = ${Vc_actual.toFixed(2)} V`, explanation: `Collector at ${(Vc_actual/Vcc*100).toFixed(0)}% of Vcc — ${Math.abs(Vc_actual - Vcc/2) < Vcc*0.2 ? 'good swing range' : 'limited swing'}.` },
       ],
     },
   };
