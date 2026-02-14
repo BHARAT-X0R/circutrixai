@@ -17,6 +17,7 @@ export interface ComponentValue {
   x: number;
   y: number;
   power?: number;
+  rotation?: number;
   tolerance?: string;
 }
 
