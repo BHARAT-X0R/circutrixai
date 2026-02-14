@@ -57,10 +57,10 @@ export function generateCommonBase(p: Record<string, number | string>): CircuitS
     parameters: { Vcc, gain: round(Av_actual) },
     components: [
       { id: "vcc", type: "voltage_source", label: "Vcc", value: String(Vcc), unit: "V", x: 325, y: 45 },
-      { id: "rc", type: "resistor", label: "RC", value: formatResistance(Rc), unit: formatResUnit(Rc), x: 325, y: 130 },
-      { id: "re", type: "resistor", label: "RE", value: formatResistance(Re), unit: formatResUnit(Re), x: 325, y: 340 },
-      { id: "r1", type: "resistor", label: "R1", value: formatResistance(R1v), unit: formatResUnit(R1v), x: 170, y: 130 },
-      { id: "r2", type: "resistor", label: "R2", value: formatResistance(R2v), unit: formatResUnit(R2v), x: 170, y: 300 },
+      { id: "rc", type: "resistor", label: "RC", value: formatResistance(Rc), unit: formatResUnit(Rc), x: 325, y: 130, rotation: 90 },
+      { id: "re", type: "resistor", label: "RE", value: formatResistance(Re), unit: formatResUnit(Re), x: 325, y: 340, rotation: 90 },
+      { id: "r1", type: "resistor", label: "R1", value: formatResistance(R1v), unit: formatResUnit(R1v), x: 170, y: 130, rotation: 90 },
+      { id: "r2", type: "resistor", label: "R2", value: formatResistance(R2v), unit: formatResUnit(R2v), x: 170, y: 300, rotation: 90 },
       { id: "q1", type: "transistor", label: "Q1", value: "2N2222", unit: "", x: 310, y: 230 },
       { id: "c1", type: "capacitor", label: "C1", value: "10", unit: "μF", x: 480, y: 340 },
       { id: "c2", type: "capacitor", label: "C2", value: "0.1", unit: "μF", x: 530, y: 165 },
@@ -143,7 +143,7 @@ export function generateDarlingtonPair(p: Record<string, number | string>): Circ
       { id: "rb", type: "resistor", label: "RB", value: formatResistance(Rbv), unit: formatResUnit(Rbv), x: 140, y: 170 },
       { id: "q1", type: "transistor", label: "Q1", value: "2N2222", unit: "", x: 280, y: 180 },
       { id: "q2", type: "transistor", label: "Q2", value: "TIP31", unit: "", x: 310, y: 280 },
-      { id: "re", type: "resistor", label: "RE", value: formatResistance(Re), unit: formatResUnit(Re), x: 330, y: 370 },
+      { id: "re", type: "resistor", label: "RE", value: formatResistance(Re), unit: formatResUnit(Re), x: 330, y: 370, rotation: 90 },
       { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 300, y: 430 },
     ],
     nodes: [

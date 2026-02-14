@@ -23,9 +23,9 @@ export function generateBandPassFilter(p: Record<string, number | string>): Circ
     parameters: { fl, fh, Q: round(Q) },
     components: [
       { id: "c_hp", type: "capacitor", label: "C1 (HP)", value: formatCapacitance(C_hp), unit: formatCapUnit(C_hp), x: 160, y: 180 },
-      { id: "r_hp", type: "resistor", label: "R1 (HP)", value: formatResistance(R_hpv), unit: formatResUnit(R_hpv), x: 270, y: 260 },
+      { id: "r_hp", type: "resistor", label: "R1 (HP)", value: formatResistance(R_hpv), unit: formatResUnit(R_hpv), x: 270, y: 260, rotation: 90 },
       { id: "r_lp", type: "resistor", label: "R2 (LP)", value: formatResistance(R_lpv), unit: formatResUnit(R_lpv), x: 380, y: 180 },
-      { id: "c_lp", type: "capacitor", label: "C2 (LP)", value: formatCapacitance(C_lp), unit: formatCapUnit(C_lp), x: 480, y: 260 },
+      { id: "c_lp", type: "capacitor", label: "C2 (LP)", value: formatCapacitance(C_lp), unit: formatCapUnit(C_lp), x: 480, y: 260, rotation: 90 },
       { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 370, y: 400 },
     ],
     nodes: [
@@ -81,8 +81,8 @@ export function generateActiveLowPass(p: Record<string, number | string>): Circu
     components: [
       { id: "r1", type: "resistor", label: "R1", value: formatResistance(Rv), unit: formatResUnit(Rv), x: 160, y: 180 },
       { id: "r2", type: "resistor", label: "R2", value: formatResistance(Rv), unit: formatResUnit(Rv), x: 290, y: 180 },
-      { id: "c1", type: "capacitor", label: "C1", value: formatCapacitance(C), unit: formatCapUnit(C), x: 230, y: 270 },
-      { id: "c2", type: "capacitor", label: "C2", value: formatCapacitance(C), unit: formatCapUnit(C), x: 500, y: 270 },
+      { id: "c1", type: "capacitor", label: "C1", value: formatCapacitance(C), unit: formatCapUnit(C), x: 230, y: 270, rotation: 90 },
+      { id: "c2", type: "capacitor", label: "C2", value: formatCapacitance(C), unit: formatCapUnit(C), x: 500, y: 270, rotation: 90 },
       { id: "u1", type: "opamp", label: opamp, value: opamp, unit: "", x: 420, y: 220 },
       { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 350, y: 400 },
     ],
@@ -138,8 +138,8 @@ export function generateActiveHighPass(p: Record<string, number | string>): Circ
     components: [
       { id: "c1", type: "capacitor", label: "C1", value: formatCapacitance(C), unit: formatCapUnit(C), x: 160, y: 180 },
       { id: "c2", type: "capacitor", label: "C2", value: formatCapacitance(C), unit: formatCapUnit(C), x: 290, y: 180 },
-      { id: "r1", type: "resistor", label: "R1", value: formatResistance(Rv), unit: formatResUnit(Rv), x: 230, y: 270 },
-      { id: "r2", type: "resistor", label: "R2", value: formatResistance(Rv), unit: formatResUnit(Rv), x: 500, y: 270 },
+      { id: "r1", type: "resistor", label: "R1", value: formatResistance(Rv), unit: formatResUnit(Rv), x: 230, y: 270, rotation: 90 },
+      { id: "r2", type: "resistor", label: "R2", value: formatResistance(Rv), unit: formatResUnit(Rv), x: 500, y: 270, rotation: 90 },
       { id: "u1", type: "opamp", label: opamp, value: opamp, unit: "", x: 420, y: 220 },
       { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 350, y: 400 },
     ],
@@ -196,10 +196,10 @@ export function generateWienBridge(p: Record<string, number | string>): CircuitS
     components: [
       { id: "r_s", type: "resistor", label: "Rs", value: formatResistance(Rv), unit: formatResUnit(Rv), x: 160, y: 260 },
       { id: "c_s", type: "capacitor", label: "Cs", value: formatCapacitance(C), unit: formatCapUnit(C), x: 280, y: 260 },
-      { id: "r_p", type: "resistor", label: "Rp", value: formatResistance(Rv), unit: formatResUnit(Rv), x: 350, y: 320 },
-      { id: "c_p", type: "capacitor", label: "Cp", value: formatCapacitance(C), unit: formatCapUnit(C), x: 420, y: 320 },
+      { id: "r_p", type: "resistor", label: "Rp", value: formatResistance(Rv), unit: formatResUnit(Rv), x: 350, y: 320, rotation: 90 },
+      { id: "c_p", type: "capacitor", label: "Cp", value: formatCapacitance(C), unit: formatCapUnit(C), x: 420, y: 320, rotation: 90 },
       { id: "rf", type: "resistor", label: "Rf", value: formatResistance(Rf), unit: formatResUnit(Rf), x: 340, y: 120 },
-      { id: "r1", type: "resistor", label: "R1", value: formatResistance(R1), unit: formatResUnit(R1), x: 260, y: 120 },
+      { id: "r1", type: "resistor", label: "R1", value: formatResistance(R1), unit: formatResUnit(R1), x: 260, y: 120, rotation: 90 },
       { id: "u1", type: "opamp", label: opamp, value: opamp, unit: "", x: 400, y: 210 },
       { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 350, y: 430 },
     ],
@@ -253,8 +253,8 @@ export function generateMonostable555(p: Record<string, number | string>): Circu
     parameters: { pulse_width_ms: round(pulseWidth * 1000) },
     components: [
       { id: "vcc", type: "voltage_source", label: "Vcc", value: "9", unit: "V", x: 300, y: 50 },
-      { id: "ra", type: "resistor", label: "R", value: formatResistance(Rv), unit: formatResUnit(Rv), x: 180, y: 160 },
-      { id: "c1", type: "capacitor", label: "C", value: formatCapacitance(C), unit: formatCapUnit(C), x: 180, y: 320 },
+      { id: "ra", type: "resistor", label: "R", value: formatResistance(Rv), unit: formatResUnit(Rv), x: 180, y: 160, rotation: 90 },
+      { id: "c1", type: "capacitor", label: "C", value: formatCapacitance(C), unit: formatCapUnit(C), x: 180, y: 320, rotation: 90 },
       { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 300, y: 430 },
     ],
     nodes: [
