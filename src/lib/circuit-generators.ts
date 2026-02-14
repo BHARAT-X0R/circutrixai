@@ -130,14 +130,14 @@ function generateCEAmplifier(p: Record<string, number | string>): CircuitSpec {
     parameters: { Vcc, targetGain, loadResistance: RL, actualGain: round(actualGain), bandwidth: `${fL}Hz – ${round(actualBW_high > 1e6 ? actualBW_high / 1e6 : actualBW_high / 1e3)}${actualBW_high > 1e6 ? 'MHz' : 'kHz'}` },
     components: [
       { id: "vcc", type: "voltage_source", label: "Vcc", value: String(Vcc), unit: "V", x: 325, y: 45 },
-      { id: "r1", type: "resistor", label: "R1", value: formatResistance(R1v), unit: formatResUnit(R1v), x: 170, y: 130 },
-      { id: "r2", type: "resistor", label: "R2", value: formatResistance(R2v), unit: formatResUnit(R2v), x: 170, y: 300 },
-      { id: "rc", type: "resistor", label: "RC", value: formatResistance(Rc), unit: formatResUnit(Rc), x: 325, y: 130 },
-      { id: "re", type: "resistor", label: "RE", value: formatResistance(Re), unit: formatResUnit(Re), x: 325, y: 340 },
+      { id: "r1", type: "resistor", label: "R1", value: formatResistance(R1v), unit: formatResUnit(R1v), x: 170, y: 130, rotation: 90 },
+      { id: "r2", type: "resistor", label: "R2", value: formatResistance(R2v), unit: formatResUnit(R2v), x: 170, y: 300, rotation: 90 },
+      { id: "rc", type: "resistor", label: "RC", value: formatResistance(Rc), unit: formatResUnit(Rc), x: 325, y: 130, rotation: 90 },
+      { id: "re", type: "resistor", label: "RE", value: formatResistance(Re), unit: formatResUnit(Re), x: 325, y: 340, rotation: 90 },
       { id: "q1", type: "transistor", label: "Q1", value: "2N2222", unit: "", x: 310, y: 230 },
       { id: "c1", type: "capacitor", label: "C1", value: formatCapacitance(C1_calc), unit: formatCapUnit(C1_calc), x: 90, y: 215 },
       { id: "c2", type: "capacitor", label: "C2", value: formatCapacitance(C2_calc), unit: formatCapUnit(C2_calc), x: 480, y: 165 },
-      { id: "ce", type: "capacitor", label: "CE", value: formatCapacitance(Ce_calc), unit: formatCapUnit(Ce_calc), x: 420, y: 340 },
+      { id: "ce", type: "capacitor", label: "CE", value: formatCapacitance(Ce_calc), unit: formatCapUnit(Ce_calc), x: 420, y: 340, rotation: 90 },
       { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 325, y: 430 },
     ],
     nodes: [
@@ -165,8 +165,8 @@ function generateCEAmplifier(p: Record<string, number | string>): CircuitSpec {
       { from: "c1", to: "n_base", current: 0, path: [{ x: 105, y: 215 }, { x: 170, y: 215 }] },
       { from: "n_collector", to: "c2", current: 0, path: [{ x: 325, y: 165 }, { x: 465, y: 165 }] },
       { from: "c2", to: "n_output", current: 0, path: [{ x: 495, y: 165 }, { x: 560, y: 165 }] },
-      { from: "n_emitter", to: "ce", current: 0, path: [{ x: 325, y: 290 }, { x: 420, y: 290 }, { x: 420, y: 315 }] },
-      { from: "ce", to: "n_gnd", current: 0, path: [{ x: 420, y: 365 }, { x: 420, y: 430 }, { x: 325, y: 430 }] },
+      { from: "n_emitter", to: "ce", current: 0, path: [{ x: 325, y: 290 }, { x: 420, y: 290 }, { x: 420, y: 325 }] },
+      { from: "ce", to: "n_gnd", current: 0, path: [{ x: 420, y: 355 }, { x: 420, y: 430 }, { x: 325, y: 430 }] },
     ],
     analysis: {
       dcOperatingPoint: [
@@ -214,8 +214,8 @@ function generateVoltageDivider(p: Record<string, number | string>): CircuitSpec
     parameters: { Vin, Vout, Iload: Number(p.Iload) || 1 },
     components: [
       { id: "vs", type: "voltage_source", label: "Vin", value: String(Vin), unit: "V", x: 150, y: 80 },
-      { id: "r1", type: "resistor", label: "R1", value: formatResistance(R1v), unit: formatResUnit(R1v), x: 300, y: 140, power: Math.pow(Vin - Vout_actual, 2) / R1v },
-      { id: "r2", type: "resistor", label: "R2", value: formatResistance(R2v), unit: formatResUnit(R2v), x: 300, y: 300, power: Math.pow(Vout_actual, 2) / R2v },
+      { id: "r1", type: "resistor", label: "R1", value: formatResistance(R1v), unit: formatResUnit(R1v), x: 300, y: 140, rotation: 90, power: Math.pow(Vin - Vout_actual, 2) / R1v },
+      { id: "r2", type: "resistor", label: "R2", value: formatResistance(R2v), unit: formatResUnit(R2v), x: 300, y: 300, rotation: 90, power: Math.pow(Vout_actual, 2) / R2v },
       { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 300, y: 420 },
     ],
     nodes: [
@@ -378,7 +378,7 @@ function generateRCLowPass(p: Record<string, number | string>): CircuitSpec {
     parameters: { cutoff: fc, order: 1 },
     components: [
       { id: "r1", type: "resistor", label: "R", value: formatResistance(Rv), unit: formatResUnit(Rv), x: 220, y: 180 },
-      { id: "c1", type: "capacitor", label: "C", value: formatCapacitance(C), unit: formatCapUnit(C), x: 380, y: 260 },
+      { id: "c1", type: "capacitor", label: "C", value: formatCapacitance(C), unit: formatCapUnit(C), x: 380, y: 260, rotation: 90 },
       { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 380, y: 380 },
     ],
     nodes: [
@@ -424,7 +424,7 @@ function generateRCHighPass(p: Record<string, number | string>): CircuitSpec {
     parameters: { cutoff: fc, order: 1 },
     components: [
       { id: "c1", type: "capacitor", label: "C", value: formatCapacitance(C), unit: formatCapUnit(C), x: 200, y: 180 },
-      { id: "r1", type: "resistor", label: "R", value: formatResistance(Rv), unit: formatResUnit(Rv), x: 370, y: 260 },
+      { id: "r1", type: "resistor", label: "R", value: formatResistance(Rv), unit: formatResUnit(Rv), x: 370, y: 260, rotation: 90 },
       { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 370, y: 380 },
     ],
     nodes: [
@@ -476,9 +476,9 @@ function generateCCAmplifier(p: Record<string, number | string>): CircuitSpec {
     parameters: { Vcc, gain: "≈1 (unity)" },
     components: [
       { id: "vcc", type: "voltage_source", label: "Vcc", value: String(Vcc), unit: "V", x: 300, y: 50 },
-      { id: "r1", type: "resistor", label: "R1", value: formatResistance(R1v), unit: formatResUnit(R1v), x: 160, y: 140 },
-      { id: "r2", type: "resistor", label: "R2", value: formatResistance(R2v), unit: formatResUnit(R2v), x: 160, y: 300 },
-      { id: "re", type: "resistor", label: "RE", value: "1", unit: "kΩ", x: 300, y: 330 },
+      { id: "r1", type: "resistor", label: "R1", value: formatResistance(R1v), unit: formatResUnit(R1v), x: 160, y: 140, rotation: 90 },
+      { id: "r2", type: "resistor", label: "R2", value: formatResistance(R2v), unit: formatResUnit(R2v), x: 160, y: 300, rotation: 90 },
+      { id: "re", type: "resistor", label: "RE", value: "1", unit: "kΩ", x: 300, y: 330, rotation: 90 },
       { id: "q1", type: "transistor", label: "Q1", value: "2N2222", unit: "", x: 280, y: 220 },
       { id: "c1", type: "capacitor", label: "C1", value: "10", unit: "μF", x: 70, y: 210 },
       { id: "c2", type: "capacitor", label: "C2", value: "10", unit: "μF", x: 440, y: 290 },
@@ -547,9 +547,9 @@ function generateAstable(p: Record<string, number | string>): CircuitSpec {
     parameters: { frequency: freq, duty_cycle: round(duty) },
     components: [
       { id: "vcc", type: "voltage_source", label: "Vcc", value: "9", unit: "V", x: 300, y: 50 },
-      { id: "ra", type: "resistor", label: "RA", value: formatResistance(Rav), unit: formatResUnit(Rav), x: 180, y: 140 },
-      { id: "rb", type: "resistor", label: "RB", value: formatResistance(Rbv), unit: formatResUnit(Rbv), x: 180, y: 260 },
-      { id: "c1", type: "capacitor", label: "C1", value: formatCapacitance(C), unit: formatCapUnit(C), x: 180, y: 370 },
+      { id: "ra", type: "resistor", label: "RA", value: formatResistance(Rav), unit: formatResUnit(Rav), x: 180, y: 140, rotation: 90 },
+      { id: "rb", type: "resistor", label: "RB", value: formatResistance(Rbv), unit: formatResUnit(Rbv), x: 180, y: 260, rotation: 90 },
+      { id: "c1", type: "capacitor", label: "C1", value: formatCapacitance(C), unit: formatCapUnit(C), x: 180, y: 370, rotation: 90 },
       { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 300, y: 430 },
     ],
     nodes: [

@@ -10,8 +10,8 @@ export function generateHalfWaveRectifier(p: Record<string, number | string>): C
   const Vout_peak = Vpeak - Vd;
   const Iload = Vout_peak / RL;
   const Vdc = Vout_peak / Math.PI;
-  const C = 1e-3; // 1000μF smoothing
-  const Vripple = Iload / (50 * C); // 50Hz mains
+  const C = 1e-3;
+  const Vripple = Iload / (50 * C);
 
   return {
     type: "Half-Wave Rectifier",
@@ -20,8 +20,8 @@ export function generateHalfWaveRectifier(p: Record<string, number | string>): C
     components: [
       { id: "vs", type: "voltage_source", label: "Vin AC", value: String(Vin), unit: "Vrms", x: 100, y: 200 },
       { id: "d1", type: "diode", label: "D1", value: "1N4007", unit: "", x: 250, y: 150 },
-      { id: "rl", type: "resistor", label: "RL", value: formatResistance(RL), unit: formatResUnit(RL), x: 420, y: 250 },
-      { id: "c1", type: "capacitor", label: "C1", value: "1000", unit: "μF", x: 340, y: 250 },
+      { id: "rl", type: "resistor", label: "RL", value: formatResistance(RL), unit: formatResUnit(RL), x: 420, y: 260, rotation: 90 },
+      { id: "c1", type: "capacitor", label: "C1", value: "1000", unit: "μF", x: 340, y: 260, rotation: 90 },
       { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 260, y: 400 },
     ],
     nodes: [
@@ -34,11 +34,12 @@ export function generateHalfWaveRectifier(p: Record<string, number | string>): C
       { from: "n_in", to: "d1", current: round(Iload * 1000), path: [{ x: 100, y: 150 }, { x: 235, y: 150 }] },
       { from: "d1", to: "n_d_out", current: round(Iload * 1000), path: [{ x: 265, y: 150 }, { x: 340, y: 150 }] },
       { from: "n_d_out", to: "n_out", current: round(Iload * 1000), path: [{ x: 340, y: 150 }, { x: 520, y: 150 }] },
-      { from: "n_d_out", to: "c1", current: 0, path: [{ x: 340, y: 150 }, { x: 340, y: 230 }] },
-      { from: "c1", to: "n_gnd", current: 0, path: [{ x: 340, y: 270 }, { x: 340, y: 400 }, { x: 260, y: 400 }] },
-      { from: "n_out", to: "rl", current: round(Iload * 1000), path: [{ x: 520, y: 150 }, { x: 420, y: 150 }, { x: 420, y: 225 }] },
-      { from: "rl", to: "n_gnd", current: round(Iload * 1000), path: [{ x: 420, y: 275 }, { x: 420, y: 400 }, { x: 260, y: 400 }] },
-      { from: "vs", to: "n_gnd", current: 0, path: [{ x: 100, y: 250 }, { x: 100, y: 400 }, { x: 260, y: 400 }] },
+      { from: "n_d_out", to: "c1", current: 0, path: [{ x: 340, y: 150 }, { x: 340, y: 245 }] },
+      { from: "c1", to: "n_gnd", current: 0, path: [{ x: 340, y: 275 }, { x: 340, y: 400 }, { x: 260, y: 400 }] },
+      { from: "n_out", to: "rl", current: round(Iload * 1000), path: [{ x: 520, y: 150 }, { x: 420, y: 150 }, { x: 420, y: 235 }] },
+      { from: "rl", to: "n_gnd", current: round(Iload * 1000), path: [{ x: 420, y: 285 }, { x: 420, y: 400 }, { x: 260, y: 400 }] },
+      { from: "vs", to: "n_in", current: round(Iload * 1000), path: [{ x: 100, y: 188 }, { x: 100, y: 150 }] },
+      { from: "vs", to: "n_gnd", current: 0, path: [{ x: 100, y: 212 }, { x: 100, y: 400 }, { x: 260, y: 400 }] },
     ],
     analysis: {
       dcOperatingPoint: [
@@ -71,40 +72,65 @@ export function generateBridgeRectifier(p: Record<string, number | string>): Cir
   const C = 1e-3;
   const Vripple = Iload / (100 * C);
 
+  // Layout: diamond bridge with vertical diodes
+  // Left column (x=180): D1 upper, D2 lower — AC+ junction at y=220
+  // Right column (x=380): D3 upper, D4 lower — AC- junction at y=220
+  // DC+ rail at y=100, DC- rail at y=350
+  // All diodes rotation:90 (cathode top, anode bottom, current flows up)
+  // D1: AC+(anode,bottom) → DC+(cathode,top)
+  // D2: DC-(anode,bottom) → AC+(cathode,top) — return path
+  // D3: AC-(anode,bottom) → DC+(cathode,top)
+  // D4: DC-(anode,bottom) → AC-(cathode,top) — return path
+
   return {
     type: "Bridge Rectifier",
     topology: "full_wave_bridge",
     parameters: { Vin_rms: Vin, RL },
     components: [
-      { id: "vs", type: "voltage_source", label: "Vin AC", value: String(Vin), unit: "Vrms", x: 80, y: 230 },
-      { id: "d1", type: "diode", label: "D1", value: "1N4007", unit: "", x: 220, y: 150 },
-      { id: "d2", type: "diode", label: "D2", value: "1N4007", unit: "", x: 220, y: 310 },
-      { id: "d3", type: "diode", label: "D3", value: "1N4007", unit: "", x: 340, y: 150 },
-      { id: "d4", type: "diode", label: "D4", value: "1N4007", unit: "", x: 340, y: 310 },
-      { id: "c1", type: "capacitor", label: "C1", value: "1000", unit: "μF", x: 440, y: 230 },
-      { id: "rl", type: "resistor", label: "RL", value: formatResistance(RL), unit: formatResUnit(RL), x: 520, y: 230 },
-      { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 280, y: 420 },
+      { id: "vs", type: "voltage_source", label: "Vin AC", value: String(Vin), unit: "Vrms", x: 80, y: 220 },
+      { id: "d1", type: "diode", label: "D1", value: "1N4007", unit: "", x: 180, y: 155, rotation: 90 },
+      { id: "d2", type: "diode", label: "D2", value: "1N4007", unit: "", x: 180, y: 290, rotation: 90 },
+      { id: "d3", type: "diode", label: "D3", value: "1N4007", unit: "", x: 380, y: 155, rotation: 90 },
+      { id: "d4", type: "diode", label: "D4", value: "1N4007", unit: "", x: 380, y: 290, rotation: 90 },
+      { id: "c1", type: "capacitor", label: "C1", value: "1000", unit: "μF", x: 470, y: 220, rotation: 90 },
+      { id: "rl", type: "resistor", label: "RL", value: formatResistance(RL), unit: formatResUnit(RL), x: 540, y: 220, rotation: 90 },
+      { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 300, y: 410 },
     ],
     nodes: [
-      { id: "n_in_top", label: "AC+", x: 150, y: 150, voltage: round(Vpeak), type: "input" },
-      { id: "n_in_bot", label: "AC−", x: 150, y: 310, voltage: round(-Vpeak), type: "input" },
-      { id: "n_dc_pos", label: "DC+", x: 440, y: 120, voltage: round(Vout_peak), type: "internal" },
-      { id: "n_dc_neg", label: "DC−", x: 440, y: 370, voltage: 0, type: "internal" },
-      { id: "n_out", label: "Vout", x: 570, y: 120, voltage: round(Vdc), type: "output" },
-      { id: "n_gnd", label: "GND", x: 280, y: 420, voltage: 0, type: "ground" },
+      { id: "n_ac_top", label: "AC+", x: 180, y: 220, voltage: round(Vpeak), type: "input" },
+      { id: "n_ac_bot", label: "AC−", x: 380, y: 220, voltage: round(-Vpeak), type: "input" },
+      { id: "n_dc_pos", label: "DC+", x: 300, y: 100, voltage: round(Vout_peak), type: "internal" },
+      { id: "n_dc_neg", label: "DC−", x: 300, y: 350, voltage: 0, type: "internal" },
+      { id: "n_out", label: "Vout", x: 580, y: 100, voltage: round(Vdc), type: "output" },
+      { id: "n_gnd", label: "GND", x: 300, y: 410, voltage: 0, type: "ground" },
     ],
     connections: [
-      { from: "vs", to: "n_in_top", current: round(Iload * 1000), path: [{ x: 80, y: 180 }, { x: 80, y: 150 }, { x: 150, y: 150 }] },
-      { from: "vs", to: "n_in_bot", current: round(Iload * 1000), path: [{ x: 80, y: 280 }, { x: 80, y: 310 }, { x: 150, y: 310 }] },
-      { from: "n_in_top", to: "d1", current: round(Iload * 1000), path: [{ x: 150, y: 150 }, { x: 205, y: 150 }] },
-      { from: "d1", to: "n_dc_pos", current: round(Iload * 1000), path: [{ x: 235, y: 150 }, { x: 280, y: 120 }, { x: 440, y: 120 }] },
-      { from: "n_in_bot", to: "d2", current: round(Iload * 1000), path: [{ x: 150, y: 310 }, { x: 205, y: 310 }] },
-      { from: "d2", to: "n_dc_neg", current: round(Iload * 1000), path: [{ x: 235, y: 310 }, { x: 280, y: 370 }, { x: 440, y: 370 }] },
-      { from: "n_dc_pos", to: "c1", current: 0, path: [{ x: 440, y: 120 }, { x: 440, y: 210 }] },
-      { from: "c1", to: "n_dc_neg", current: 0, path: [{ x: 440, y: 250 }, { x: 440, y: 370 }] },
-      { from: "n_dc_pos", to: "n_out", current: round(Iload * 1000), path: [{ x: 440, y: 120 }, { x: 570, y: 120 }] },
-      { from: "n_out", to: "rl", current: round(Iload * 1000), path: [{ x: 520, y: 120 }, { x: 520, y: 205 }] },
-      { from: "rl", to: "n_dc_neg", current: round(Iload * 1000), path: [{ x: 520, y: 255 }, { x: 520, y: 370 }, { x: 440, y: 370 }] },
+      // VS to AC junction nodes
+      { from: "vs", to: "n_ac_top", current: round(Iload * 1000), path: [{ x: 92, y: 220 }, { x: 180, y: 220 }] },
+      { from: "vs", to: "n_ac_bot", current: round(Iload * 1000), path: [{ x: 80, y: 232 }, { x: 80, y: 395 }, { x: 380, y: 395 }, { x: 380, y: 220 }] },
+      // D1: AC+ (anode, bottom) up to DC+ (cathode, top)
+      { from: "n_ac_top", to: "d1", current: round(Iload * 1000), path: [{ x: 180, y: 220 }, { x: 180, y: 170 }] },
+      { from: "d1", to: "n_dc_pos", current: round(Iload * 1000), path: [{ x: 180, y: 140 }, { x: 180, y: 100 }] },
+      // D3: AC- (anode, bottom) up to DC+ (cathode, top)
+      { from: "n_ac_bot", to: "d3", current: round(Iload * 1000), path: [{ x: 380, y: 220 }, { x: 380, y: 170 }] },
+      { from: "d3", to: "n_dc_pos", current: round(Iload * 1000), path: [{ x: 380, y: 140 }, { x: 380, y: 100 }] },
+      // D2: DC- (anode, bottom) up to AC+ (cathode, top) — return path
+      { from: "n_dc_neg", to: "d2", current: round(Iload * 1000), path: [{ x: 180, y: 350 }, { x: 180, y: 305 }] },
+      { from: "d2", to: "n_ac_top", current: round(Iload * 1000), path: [{ x: 180, y: 275 }, { x: 180, y: 220 }] },
+      // D4: DC- (anode, bottom) up to AC- (cathode, top) — return path
+      { from: "n_dc_neg", to: "d4", current: round(Iload * 1000), path: [{ x: 380, y: 350 }, { x: 380, y: 305 }] },
+      { from: "d4", to: "n_ac_bot", current: round(Iload * 1000), path: [{ x: 380, y: 275 }, { x: 380, y: 220 }] },
+      // DC+ rail (horizontal)
+      { from: "n_dc_pos", to: "n_out", current: round(Iload * 1000), path: [{ x: 180, y: 100 }, { x: 580, y: 100 }] },
+      // DC- rail (horizontal) connecting to GND
+      { from: "n_dc_neg", to: "n_gnd", current: round(Iload * 1000), path: [{ x: 180, y: 350 }, { x: 540, y: 350 }] },
+      { from: "n_dc_neg", to: "n_gnd", current: 0, path: [{ x: 300, y: 350 }, { x: 300, y: 402 }] },
+      // C1: DC+ rail down to DC- rail
+      { from: "n_dc_pos", to: "c1", current: 0, path: [{ x: 470, y: 100 }, { x: 470, y: 205 }] },
+      { from: "c1", to: "n_dc_neg", current: 0, path: [{ x: 470, y: 235 }, { x: 470, y: 350 }] },
+      // RL: DC+ rail down to DC- rail
+      { from: "n_out", to: "rl", current: round(Iload * 1000), path: [{ x: 540, y: 100 }, { x: 540, y: 195 }] },
+      { from: "rl", to: "n_dc_neg", current: round(Iload * 1000), path: [{ x: 540, y: 245 }, { x: 540, y: 350 }] },
     ],
     analysis: {
       dcOperatingPoint: [
@@ -140,7 +166,7 @@ export function generateSeriesClipper(p: Record<string, number | string>): Circu
     components: [
       { id: "vs", type: "voltage_source", label: "Vin", value: String(Vin), unit: "Vp", x: 80, y: 220 },
       { id: "r1", type: "resistor", label: "R", value: formatResistance(RL), unit: formatResUnit(RL), x: 220, y: 160 },
-      { id: "d1", type: "diode", label: "D1", value: "1N4148", unit: "", x: 380, y: 250 },
+      { id: "d1", type: "diode", label: "D1", value: "1N4148", unit: "", x: 380, y: 250, rotation: 270 },
       { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 280, y: 400 },
     ],
     nodes: [
@@ -150,12 +176,13 @@ export function generateSeriesClipper(p: Record<string, number | string>): Circu
       { id: "n_gnd", label: "GND", x: 280, y: 400, voltage: 0, type: "ground" },
     ],
     connections: [
-      { from: "n_in", to: "r1", current: round((Vin - Vclip) / RL * 1000), path: [{ x: 80, y: 160 }, { x: 200, y: 160 }] },
+      { from: "n_in", to: "r1", current: round((Vin - Vclip) / RL * 1000), path: [{ x: 80, y: 160 }, { x: 195, y: 160 }] },
       { from: "r1", to: "n_mid", current: round((Vin - Vclip) / RL * 1000), path: [{ x: 245, y: 160 }, { x: 380, y: 160 }] },
       { from: "n_mid", to: "d1", current: 0, path: [{ x: 380, y: 160 }, { x: 380, y: 235 }] },
       { from: "d1", to: "n_gnd", current: 0, path: [{ x: 380, y: 265 }, { x: 380, y: 400 }, { x: 280, y: 400 }] },
       { from: "n_mid", to: "n_out", current: 0, path: [{ x: 380, y: 160 }, { x: 500, y: 160 }] },
-      { from: "vs", to: "n_gnd", current: 0, path: [{ x: 80, y: 280 }, { x: 80, y: 400 }, { x: 280, y: 400 }] },
+      { from: "vs", to: "n_in", current: 0, path: [{ x: 80, y: 208 }, { x: 80, y: 160 }] },
+      { from: "vs", to: "n_gnd", current: 0, path: [{ x: 80, y: 232 }, { x: 80, y: 400 }, { x: 280, y: 400 }] },
     ],
     analysis: {
       dcOperatingPoint: [
@@ -186,8 +213,8 @@ export function generatePositiveClamper(p: Record<string, number | string>): Cir
     components: [
       { id: "vs", type: "voltage_source", label: "Vin", value: String(Vin), unit: "Vp", x: 80, y: 230 },
       { id: "c1", type: "capacitor", label: "C", value: "10", unit: "μF", x: 220, y: 170 },
-      { id: "d1", type: "diode", label: "D1", value: "1N4148", unit: "", x: 350, y: 280 },
-      { id: "rl", type: "resistor", label: "RL", value: formatResistance(RL), unit: formatResUnit(RL), x: 460, y: 280 },
+      { id: "d1", type: "diode", label: "D1", value: "1N4148", unit: "", x: 350, y: 250, rotation: 90 },
+      { id: "rl", type: "resistor", label: "RL", value: formatResistance(RL), unit: formatResUnit(RL), x: 460, y: 280, rotation: 90 },
       { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 300, y: 400 },
     ],
     nodes: [
@@ -200,11 +227,12 @@ export function generatePositiveClamper(p: Record<string, number | string>): Cir
       { from: "n_in", to: "c1", current: 0, path: [{ x: 80, y: 170 }, { x: 205, y: 170 }] },
       { from: "c1", to: "n_mid", current: 0, path: [{ x: 235, y: 170 }, { x: 350, y: 170 }] },
       { from: "n_mid", to: "n_out", current: 0, path: [{ x: 350, y: 170 }, { x: 460, y: 170 }] },
-      { from: "n_mid", to: "d1", current: 0, path: [{ x: 350, y: 170 }, { x: 350, y: 265 }] },
-      { from: "d1", to: "n_gnd", current: 0, path: [{ x: 350, y: 295 }, { x: 350, y: 400 }, { x: 300, y: 400 }] },
+      { from: "n_mid", to: "d1", current: 0, path: [{ x: 350, y: 170 }, { x: 350, y: 235 }] },
+      { from: "d1", to: "n_gnd", current: 0, path: [{ x: 350, y: 265 }, { x: 350, y: 400 }, { x: 300, y: 400 }] },
       { from: "n_out", to: "rl", current: 0, path: [{ x: 460, y: 170 }, { x: 460, y: 255 }] },
       { from: "rl", to: "n_gnd", current: 0, path: [{ x: 460, y: 305 }, { x: 460, y: 400 }, { x: 300, y: 400 }] },
-      { from: "vs", to: "n_gnd", current: 0, path: [{ x: 80, y: 290 }, { x: 80, y: 400 }, { x: 300, y: 400 }] },
+      { from: "vs", to: "n_in", current: 0, path: [{ x: 80, y: 218 }, { x: 80, y: 170 }] },
+      { from: "vs", to: "n_gnd", current: 0, path: [{ x: 80, y: 242 }, { x: 80, y: 400 }, { x: 300, y: 400 }] },
     ],
     analysis: {
       dcOperatingPoint: [
@@ -236,8 +264,8 @@ export function generateNegativeClamper(p: Record<string, number | string>): Cir
     components: [
       { id: "vs", type: "voltage_source", label: "Vin", value: String(Vin), unit: "Vp", x: 80, y: 230 },
       { id: "c1", type: "capacitor", label: "C", value: "10", unit: "μF", x: 220, y: 170 },
-      { id: "d1", type: "diode", label: "D1", value: "1N4148", unit: "", x: 350, y: 280 },
-      { id: "rl", type: "resistor", label: "RL", value: formatResistance(RL), unit: formatResUnit(RL), x: 460, y: 280 },
+      { id: "d1", type: "diode", label: "D1", value: "1N4148", unit: "", x: 350, y: 250, rotation: 270 },
+      { id: "rl", type: "resistor", label: "RL", value: formatResistance(RL), unit: formatResUnit(RL), x: 460, y: 280, rotation: 90 },
       { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 300, y: 400 },
     ],
     nodes: [
@@ -250,11 +278,12 @@ export function generateNegativeClamper(p: Record<string, number | string>): Cir
       { from: "n_in", to: "c1", current: 0, path: [{ x: 80, y: 170 }, { x: 205, y: 170 }] },
       { from: "c1", to: "n_mid", current: 0, path: [{ x: 235, y: 170 }, { x: 350, y: 170 }] },
       { from: "n_mid", to: "n_out", current: 0, path: [{ x: 350, y: 170 }, { x: 460, y: 170 }] },
-      { from: "n_gnd", to: "d1", current: 0, path: [{ x: 350, y: 400 }, { x: 350, y: 295 }] },
-      { from: "d1", to: "n_mid", current: 0, path: [{ x: 350, y: 265 }, { x: 350, y: 170 }] },
+      { from: "n_gnd", to: "d1", current: 0, path: [{ x: 350, y: 400 }, { x: 350, y: 265 }] },
+      { from: "d1", to: "n_mid", current: 0, path: [{ x: 350, y: 235 }, { x: 350, y: 170 }] },
       { from: "n_out", to: "rl", current: 0, path: [{ x: 460, y: 170 }, { x: 460, y: 255 }] },
       { from: "rl", to: "n_gnd", current: 0, path: [{ x: 460, y: 305 }, { x: 460, y: 400 }, { x: 300, y: 400 }] },
-      { from: "vs", to: "n_gnd", current: 0, path: [{ x: 80, y: 290 }, { x: 80, y: 400 }, { x: 300, y: 400 }] },
+      { from: "vs", to: "n_in", current: 0, path: [{ x: 80, y: 218 }, { x: 80, y: 170 }] },
+      { from: "vs", to: "n_gnd", current: 0, path: [{ x: 80, y: 242 }, { x: 80, y: 400 }, { x: 300, y: 400 }] },
     ],
     analysis: {
       dcOperatingPoint: [
