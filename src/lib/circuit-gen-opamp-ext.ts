@@ -73,15 +73,16 @@ export function generateSummingAmplifier(p: Record<string, number | string>): Ci
 
   nodes.push(
     { id: "n_inv", label: "V−", x: 260, y: 210, voltage: 0, type: "internal" },
-    { id: "n_ninv", label: "V+", x: 300, y: 260, voltage: 0, type: "internal" },
+    { id: "n_ninv", label: "V+", x: 295, y: 250, voltage: 0, type: "internal" },
     { id: "n_out", label: "Vout", x: 500, y: 230, voltage: 0, type: "output" },
     { id: "n_gnd", label: "GND", x: 300, y: 380, voltage: 0, type: "ground" },
   );
 
   connections.push(
-    { from: "n_inv", to: "rf_l", current: 0, path: [{ x: 260, y: 210 }, { x: 260, y: 130 }, { x: 320, y: 130 }] },
+    { from: "n_inv", to: "rf_l", current: 0, path: [{ x: 260, y: 210 }, { x: 260, y: 130 }, { x: 315, y: 130 }] },
     { from: "rf_r", to: "n_out", current: 0, path: [{ x: 365, y: 130 }, { x: 500, y: 130 }, { x: 500, y: 230 }] },
-    { from: "n_ninv", to: "n_gnd", current: 0, path: [{ x: 300, y: 260 }, { x: 300, y: 380 }] },
+    { from: "n_inv", to: "u1_inv", current: 0, path: [{ x: 260, y: 210 }, { x: 295, y: 210 }] },
+    { from: "n_ninv", to: "n_gnd", current: 0, path: [{ x: 295, y: 250 }, { x: 295, y: 380 }] },
     { from: "u1", to: "n_out", current: 0, path: [{ x: 390, y: 230 }, { x: 500, y: 230 }] },
   );
 
@@ -135,11 +136,12 @@ export function generateIntegrator(p: Record<string, number | string>): CircuitS
       { id: "n_gnd", label: "GND", x: 300, y: 380, voltage: 0, type: "ground" },
     ],
     connections: [
-      { from: "n_in", to: "rin", current: 0, path: [{ x: 50, y: 200 }, { x: 140, y: 200 }] },
+      { from: "n_in", to: "rin", current: 0, path: [{ x: 50, y: 200 }, { x: 135, y: 200 }] },
       { from: "rin", to: "n_inv", current: 0, path: [{ x: 185, y: 200 }, { x: 260, y: 210 }] },
       { from: "n_inv", to: "cf_l", current: 0, path: [{ x: 260, y: 210 }, { x: 260, y: 130 }, { x: 325, y: 130 }] },
       { from: "cf_r", to: "n_out", current: 0, path: [{ x: 355, y: 130 }, { x: 500, y: 130 }, { x: 500, y: 230 }] },
-      { from: "n_ninv", to: "n_gnd", current: 0, path: [{ x: 300, y: 250 }, { x: 300, y: 380 }] },
+      { from: "n_inv", to: "u1_inv", current: 0, path: [{ x: 260, y: 210 }, { x: 295, y: 210 }] },
+      { from: "n_ninv", to: "n_gnd", current: 0, path: [{ x: 295, y: 250 }, { x: 295, y: 380 }] },
       { from: "u1", to: "n_out", current: 0, path: [{ x: 390, y: 230 }, { x: 500, y: 230 }] },
     ],
     analysis: {
@@ -186,9 +188,10 @@ export function generateDifferentiator(p: Record<string, number | string>): Circ
     connections: [
       { from: "n_in", to: "cin", current: 0, path: [{ x: 50, y: 200 }, { x: 145, y: 200 }] },
       { from: "cin", to: "n_inv", current: 0, path: [{ x: 175, y: 200 }, { x: 260, y: 210 }] },
-      { from: "n_inv", to: "rf_l", current: 0, path: [{ x: 260, y: 210 }, { x: 260, y: 130 }, { x: 320, y: 130 }] },
+      { from: "n_inv", to: "rf_l", current: 0, path: [{ x: 260, y: 210 }, { x: 260, y: 130 }, { x: 315, y: 130 }] },
       { from: "rf_r", to: "n_out", current: 0, path: [{ x: 365, y: 130 }, { x: 500, y: 130 }, { x: 500, y: 230 }] },
-      { from: "n_ninv", to: "n_gnd", current: 0, path: [{ x: 300, y: 250 }, { x: 300, y: 380 }] },
+      { from: "n_inv", to: "u1_inv", current: 0, path: [{ x: 260, y: 210 }, { x: 295, y: 210 }] },
+      { from: "n_ninv", to: "n_gnd", current: 0, path: [{ x: 295, y: 250 }, { x: 295, y: 380 }] },
       { from: "u1", to: "n_out", current: 0, path: [{ x: 390, y: 230 }, { x: 500, y: 230 }] },
     ],
     analysis: {
