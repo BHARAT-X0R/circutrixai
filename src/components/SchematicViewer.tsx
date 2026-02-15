@@ -98,9 +98,12 @@ const SchematicViewer: React.FC<SchematicViewerProps> = ({ circuit, showFlow }) 
                 )}
                 {comp.type === "opamp" && (
                   <g transform={`translate(${comp.x}, ${comp.y})`}>
-                    <polygon points="-20,-25 -20,25 25,0" fill="none" stroke={color} strokeWidth="1.5" />
-                    <text x="-14" y="-8" fontSize="10" fill={color} fontFamily="monospace">−</text>
-                    <text x="-14" y="12" fontSize="10" fill={color} fontFamily="monospace">+</text>
+                    <polygon points="-25,-30 -25,30 30,0" fill="none" stroke={color} strokeWidth="1.5" />
+                    <text x="-18" y="-12" fontSize="10" fill={color} fontFamily="monospace">−</text>
+                    <text x="-18" y="18" fontSize="10" fill={color} fontFamily="monospace">+</text>
+                    <line x1="-25" y1="-20" x2="-45" y2="-20" stroke={color} strokeWidth="1.5" />
+                    <line x1="-25" y1="20" x2="-45" y2="20" stroke={color} strokeWidth="1.5" />
+                    <line x1="30" y1="0" x2="50" y2="0" stroke={color} strokeWidth="1.5" />
                   </g>
                 )}
                 {comp.type === "inductor" && (
