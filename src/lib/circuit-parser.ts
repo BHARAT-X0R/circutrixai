@@ -3,6 +3,8 @@ export type CircuitType =
   | "cc_amplifier"
   | "cb_amplifier"
   | "darlington_pair"
+  | "single_tuned_amplifier"
+  | "multistage_amplifier"
   | "voltage_divider"
   | "inverting_opamp"
   | "non_inverting_opamp"
@@ -165,6 +167,24 @@ const rules: PatternRule[] = [
     defaults: { pulseWidth: 0.001 },
   },
   // ── Transistor extended ──
+  {
+    type: "single_tuned_amplifier",
+    patterns: [/single\s*tuned/i, /tuned\s*amplifier/i, /lc\s*tuned/i, /resonant\s*amplifier/i],
+    paramExtractors: {
+      Vcc: /vcc\s*[-=:]?\s*(\d+\.?\d*)/i,
+      freq: /(\d+\.?\d*)\s*(k?hz)/i,
+    },
+    defaults: { Vcc: 12, freq: 10000 },
+  },
+  {
+    type: "multistage_amplifier",
+    patterns: [/multi[\s-]?stage/i, /two[\s-]?stage/i, /cascad(e|ed)\s*(amplifier|ce)?/i, /2[\s-]?stage/i],
+    paramExtractors: {
+      Vcc: /vcc\s*[-=:]?\s*(\d+\.?\d*)/i,
+      gain: /gain\s*[-=:]?\s*(\d+\.?\d*)/i,
+    },
+    defaults: { Vcc: 12, gain: 200 },
+  },
   {
     type: "cb_amplifier",
     patterns: [/common\s*base/i, /cb\s*amplifier/i, /grounded[\s-]?base/i],

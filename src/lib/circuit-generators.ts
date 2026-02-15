@@ -7,7 +7,7 @@ import { generateAmplifierResponse, generateOpAmpResponse, generateLowPassRespon
 import { generateHalfWaveRectifier, generateBridgeRectifier, generateSeriesClipper, generatePositiveClamper, generateNegativeClamper } from "./circuit-gen-diode";
 import { generateVoltageFollower, generateSummingAmplifier, generateIntegrator, generateDifferentiator } from "./circuit-gen-opamp-ext";
 import { generateBandPassFilter, generateActiveLowPass, generateActiveHighPass, generateWienBridge, generateMonostable555 } from "./circuit-gen-filter-ext";
-import { generateCommonBase, generateDarlingtonPair } from "./circuit-gen-transistor-ext";
+import { generateCommonBase, generateDarlingtonPair, generateSingleTuned, generateMultistageAmplifier } from "./circuit-gen-transistor-ext";
 
 export function generateCircuit(intent: ParsedIntent): CircuitSpec {
   switch (intent.circuitType) {
@@ -19,6 +19,10 @@ export function generateCircuit(intent: ParsedIntent): CircuitSpec {
       return generateCommonBase(intent.params);
     case "darlington_pair":
       return generateDarlingtonPair(intent.params);
+    case "single_tuned_amplifier":
+      return generateSingleTuned(intent.params);
+    case "multistage_amplifier":
+      return generateMultistageAmplifier(intent.params);
     case "voltage_divider":
       return generateVoltageDivider(intent.params);
     case "inverting_opamp":
