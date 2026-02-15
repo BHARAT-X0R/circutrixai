@@ -29,6 +29,8 @@ export const examplePrompts = [
   "Monostable 555 timer, 10ms pulse",
   "Common base amplifier, Vcc 12V",
   "Darlington pair driver, Vcc 12V",
+  "Single tuned amplifier at 10kHz",
+  "Two-stage cascaded CE amplifier with gain 200",
   "Non-inverting op-amp amplifier with gain 20",
   "High-pass filter, fc = 500Hz",
 ];
