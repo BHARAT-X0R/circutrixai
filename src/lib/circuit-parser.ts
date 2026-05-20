@@ -327,7 +327,9 @@ const rules: PatternRule[] = [
 ];
 
 function extractFrequency(prompt: string): number | null {
-  const match = prompt.match(/(\d+\.?\d*)\s*(khz|kHz|KHz)/i);
+  const mhz = prompt.match(/(\d+\.?\d*)\s*mhz/i);
+  if (mhz) return parseFloat(mhz[1]) * 1e6;
+  const match = prompt.match(/(\d+\.?\d*)\s*khz/i);
   if (match) return parseFloat(match[1]) * 1000;
   const matchHz = prompt.match(/(\d+\.?\d*)\s*hz/i);
   if (matchHz) return parseFloat(matchHz[1]);
