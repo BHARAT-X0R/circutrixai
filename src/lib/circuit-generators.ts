@@ -8,6 +8,7 @@ import { generateHalfWaveRectifier, generateBridgeRectifier, generateSeriesClipp
 import { generateVoltageFollower, generateSummingAmplifier, generateIntegrator, generateDifferentiator } from "./circuit-gen-opamp-ext";
 import { generateBandPassFilter, generateActiveLowPass, generateActiveHighPass, generateWienBridge, generateMonostable555 } from "./circuit-gen-filter-ext";
 import { generateCommonBase, generateDarlingtonPair, generateSingleTuned, generateMultistageAmplifier } from "./circuit-gen-transistor-ext";
+import { generateHartleyOscillator, generateColpittsOscillator, generatePhaseShiftOscillator, generateCrystalOscillator } from "./circuit-gen-oscillator-ext";
 
 export function generateCircuit(intent: ParsedIntent): CircuitSpec {
   switch (intent.circuitType) {
@@ -53,6 +54,14 @@ export function generateCircuit(intent: ParsedIntent): CircuitSpec {
       return generateMonostable555(intent.params);
     case "wien_bridge_oscillator":
       return generateWienBridge(intent.params);
+    case "hartley_oscillator":
+      return generateHartleyOscillator(intent.params);
+    case "colpitts_oscillator":
+      return generateColpittsOscillator(intent.params);
+    case "phase_shift_oscillator":
+      return generatePhaseShiftOscillator(intent.params);
+    case "crystal_oscillator":
+      return generateCrystalOscillator(intent.params);
     case "half_wave_rectifier":
       return generateHalfWaveRectifier(intent.params);
     case "bridge_rectifier":

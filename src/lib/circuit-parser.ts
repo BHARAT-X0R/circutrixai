@@ -20,6 +20,10 @@ export type CircuitType =
   | "astable_multivibrator"
   | "monostable_555"
   | "wien_bridge_oscillator"
+  | "hartley_oscillator"
+  | "colpitts_oscillator"
+  | "phase_shift_oscillator"
+  | "crystal_oscillator"
   | "half_wave_rectifier"
   | "bridge_rectifier"
   | "series_clipper"
@@ -159,6 +163,42 @@ const rules: PatternRule[] = [
     defaults: { freq: 1000, opamp: "LM741" },
   },
   {
+    type: "hartley_oscillator",
+    patterns: [/hartley/i],
+    paramExtractors: {
+      freq: /(\d+\.?\d*)\s*(k?hz|mhz)/i,
+      Vcc: /vcc\s*[-=:]?\s*(\d+\.?\d*)/i,
+    },
+    defaults: { freq: 100000, Vcc: 12 },
+  },
+  {
+    type: "colpitts_oscillator",
+    patterns: [/colpitts/i],
+    paramExtractors: {
+      freq: /(\d+\.?\d*)\s*(k?hz|mhz)/i,
+      Vcc: /vcc\s*[-=:]?\s*(\d+\.?\d*)/i,
+    },
+    defaults: { freq: 100000, Vcc: 12 },
+  },
+  {
+    type: "phase_shift_oscillator",
+    patterns: [/phase[\s-]?shift\s*(oscillator)?/i, /rc\s*phase/i],
+    paramExtractors: {
+      freq: /(\d+\.?\d*)\s*(k?hz)/i,
+      Vcc: /vcc\s*[-=:]?\s*(\d+\.?\d*)/i,
+    },
+    defaults: { freq: 1000, Vcc: 12 },
+  },
+  {
+    type: "crystal_oscillator",
+    patterns: [/crystal\s*(oscillator)?/i, /pierce\s*(oscillator)?/i, /xtal/i, /quartz/i],
+    paramExtractors: {
+      freq: /(\d+\.?\d*)\s*(k?hz|mhz)/i,
+      Vcc: /vcc\s*[-=:]?\s*(\d+\.?\d*)/i,
+    },
+    defaults: { freq: 4000000, Vcc: 5 },
+  },
+  {
     type: "monostable_555",
     patterns: [/monostable/i, /one[\s-]?shot/i, /555\s*mono/i],
     paramExtractors: {
@@ -287,7 +327,9 @@ const rules: PatternRule[] = [
 ];
 
 function extractFrequency(prompt: string): number | null {
-  const match = prompt.match(/(\d+\.?\d*)\s*(khz|kHz|KHz)/i);
+  const mhz = prompt.match(/(\d+\.?\d*)\s*mhz/i);
+  if (mhz) return parseFloat(mhz[1]) * 1e6;
+  const match = prompt.match(/(\d+\.?\d*)\s*khz/i);
   if (match) return parseFloat(match[1]) * 1000;
   const matchHz = prompt.match(/(\d+\.?\d*)\s*hz/i);
   if (matchHz) return parseFloat(matchHz[1]);
