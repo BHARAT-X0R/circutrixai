@@ -456,8 +456,8 @@ export function generateMultistageAmplifier(p: Record<string, number | string>):
       { from: "n_input", to: "c1", current: 0, path: [{ x: s1x + 10, y: 215 }, { x: s1x + 25, y: 215 }] },
       { from: "c1", to: "n_b1", current: 0, path: [{ x: s1x + 55, y: 215 }, { x: s1x + 120, y: 215 }] },
       // Stage 1 bypass
-      { from: "n_e1", to: "ce1", current: 0, path: [{ x: s1x + 250, y: 290 }, { x: s1x + 340, y: 290 }, { x: s1x + 340, y: 315 }] },
-      { from: "ce1", to: "n_gnd", current: 0, path: [{ x: s1x + 340, y: 365 }, { x: s1x + 340, y: 460 }, { x: 350, y: 460 }] },
+      { from: "n_e1", to: "ce1", current: 0, path: [{ x: s1x + 250, y: 290 }, { x: s1x + 340, y: 290 }, { x: s1x + 340, y: 325 }] },
+      { from: "ce1", to: "n_gnd", current: 0, path: [{ x: s1x + 340, y: 355 }, { x: s1x + 340, y: 460 }, { x: 350, y: 460 }] },
       // ── Coupling between stages ──
       { from: "n_c1", to: "cc", current: 0, path: [{ x: s1x + 250, y: 165 }, { x: s1x + 310, y: 165 }] },
       { from: "cc", to: "n_b2", current: 0, path: [{ x: s1x + 340, y: 165 }, { x: s2x + 120, y: 165 }, { x: s2x + 120, y: 215 }] },
@@ -475,8 +475,8 @@ export function generateMultistageAmplifier(p: Record<string, number | string>):
       { from: "n_b2", to: "r2b", current: round(I_div2 * 1000), path: [{ x: s2x + 120, y: 215 }, { x: s2x + 120, y: 275 }] },
       { from: "r2b", to: "n_gnd", current: round(I_div2 * 1000), path: [{ x: s2x + 120, y: 325 }, { x: s2x + 120, y: 460 }, { x: 350, y: 460 }] },
       // Stage 2 bypass
-      { from: "n_e2", to: "ce2", current: 0, path: [{ x: s2x + 250, y: 290 }, { x: s2x + 340, y: 290 }, { x: s2x + 340, y: 315 }] },
-      { from: "ce2", to: "n_gnd", current: 0, path: [{ x: s2x + 340, y: 365 }, { x: s2x + 340, y: 460 }, { x: 350, y: 460 }] },
+      { from: "n_e2", to: "ce2", current: 0, path: [{ x: s2x + 250, y: 290 }, { x: s2x + 340, y: 290 }, { x: s2x + 340, y: 325 }] },
+      { from: "ce2", to: "n_gnd", current: 0, path: [{ x: s2x + 340, y: 355 }, { x: s2x + 340, y: 460 }, { x: 350, y: 460 }] },
       // Stage 2 output coupling
       { from: "n_c2", to: "c2", current: 0, path: [{ x: s2x + 250, y: 165 }, { x: s2x + 315, y: 165 }] },
       { from: "c2", to: "n_output", current: 0, path: [{ x: s2x + 345, y: 165 }, { x: s2x + 400, y: 165 }] },
