@@ -18,10 +18,23 @@ const componentColors: Record<string, string> = {
 };
 
 const SchematicViewer: React.FC<SchematicViewerProps> = ({ circuit, showFlow }) => {
+  const maxX = Math.max(
+    650,
+    ...circuit.components.map((comp) => comp.x + 70),
+    ...circuit.nodes.map((node) => node.x + 90),
+    ...circuit.connections.flatMap((conn) => conn.path.map((p) => p.x + 60)),
+  );
+  const maxY = Math.max(
+    460,
+    ...circuit.components.map((comp) => comp.y + 70),
+    ...circuit.nodes.map((node) => node.y + 40),
+    ...circuit.connections.flatMap((conn) => conn.path.map((p) => p.y + 40)),
+  );
+
   return (
     <div className="w-full h-full bg-card rounded-lg border border-border overflow-hidden relative">
       <div className="absolute inset-0 blueprint-grid opacity-50" />
-      <svg viewBox="0 0 650 460" className="w-full h-full relative z-10">
+      <svg viewBox={`0 0 ${maxX} ${maxY}`} className="w-full h-full relative z-10">
         {/* Connections */}
         {circuit.connections.map((conn, i) => (
           <g key={`conn-${i}`}>
@@ -72,9 +85,13 @@ const SchematicViewer: React.FC<SchematicViewerProps> = ({ circuit, showFlow }) 
                 {comp.type === "transistor" && (
                   <g transform={`translate(${comp.x}, ${comp.y})`}>
                     <circle r="18" fill="none" stroke={color} strokeWidth="1.5" />
+                    <line x1="-25" y1="-15" x2="-25" y2="-10" stroke={color} strokeWidth="1.5" />
+                    <line x1="-25" y1="-10" x2="-8" y2="-10" stroke={color} strokeWidth="1.5" />
                     <line x1="-8" y1="-10" x2="-8" y2="10" stroke={color} strokeWidth="2" />
                     <line x1="-8" y1="-6" x2="8" y2="-14" stroke={color} strokeWidth="1.5" />
+                    <line x1="8" y1="-14" x2="20" y2="-20" stroke={color} strokeWidth="1.5" />
                     <line x1="-8" y1="6" x2="8" y2="14" stroke={color} strokeWidth="1.5" />
+                    <line x1="8" y1="14" x2="20" y2="20" stroke={color} strokeWidth="1.5" />
                     <polygon points="4,12 8,14 4,16" fill={color} />
                     <text x="-30" y="5" fontSize="9" fill={color} fontFamily="monospace">B</text>
                     <text x="12" y="-10" fontSize="9" fill={color} fontFamily="monospace">C</text>
@@ -108,9 +125,9 @@ const SchematicViewer: React.FC<SchematicViewerProps> = ({ circuit, showFlow }) 
                 )}
                 {comp.type === "inductor" && (
                   <g transform={`translate(${comp.x}, ${comp.y})`}>
-                    <path d="M-15,0 C-12,-8 -6,-8 -3,0 C0,-8 6,-8 9,0 C12,-8 18,-8 21,0" fill="none" stroke={color} strokeWidth="1.5" />
+                    <path d="M-15,0 C-12,-8 -7,-8 -5,0 C-3,-8 2,-8 5,0 C7,-8 12,-8 15,0" fill="none" stroke={color} strokeWidth="1.5" />
                     <line x1="-15" y1="0" x2="-25" y2="0" stroke={color} strokeWidth="1.5" />
-                    <line x1="21" y1="0" x2="31" y2="0" stroke={color} strokeWidth="1.5" />
+                    <line x1="15" y1="0" x2="25" y2="0" stroke={color} strokeWidth="1.5" />
                   </g>
                 )}
                 {comp.type === "diode" && (
