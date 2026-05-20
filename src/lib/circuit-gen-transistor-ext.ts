@@ -79,12 +79,13 @@ export function generateCommonBase(p: Record<string, number | string>): CircuitS
     connections: [
       { from: "n_vcc", to: "rc", current: round(Ic_actual * 1000), path: [{ x: 325, y: 45 }, { x: 325, y: 105 }] },
       { from: "rc", to: "n_collector", current: round(Ic_actual * 1000), path: [{ x: 325, y: 155 }, { x: 325, y: 165 }] },
-      { from: "n_collector", to: "q1", current: round(Ic_actual * 1000), path: [{ x: 325, y: 165 }, { x: 325, y: 210 }] },
-      { from: "q1", to: "n_emitter", current: round(Ic_actual * 1000), path: [{ x: 325, y: 250 }, { x: 325, y: 290 }] },
+      { from: "n_collector", to: "q1_c", current: round(Ic_actual * 1000), path: [{ x: 325, y: 165 }, { x: 330, y: 165 }, { x: 330, y: 210 }] },
+      { from: "q1_e", to: "n_emitter", current: round(Ic_actual * 1000), path: [{ x: 330, y: 250 }, { x: 330, y: 290 }, { x: 325, y: 290 }] },
       { from: "n_emitter", to: "re", current: round(Ic_actual * 1000), path: [{ x: 325, y: 290 }, { x: 325, y: 315 }] },
       { from: "re", to: "n_gnd", current: round(Ic_actual * 1000), path: [{ x: 325, y: 365 }, { x: 325, y: 430 }] },
       { from: "n_vcc", to: "r1", current: round(I_divider * 1000), path: [{ x: 325, y: 45 }, { x: 170, y: 45 }, { x: 170, y: 105 }] },
       { from: "r1", to: "n_base", current: round(I_divider * 1000), path: [{ x: 170, y: 155 }, { x: 170, y: 215 }, { x: 250, y: 215 }] },
+      { from: "n_base", to: "q1_b", current: round(Ic_actual / beta * 1000, 4), path: [{ x: 250, y: 215 }, { x: 285, y: 215 }] },
       { from: "n_base", to: "r2", current: round(I_divider * 1000), path: [{ x: 170, y: 215 }, { x: 170, y: 275 }] },
       { from: "r2", to: "n_gnd", current: round(I_divider * 1000), path: [{ x: 170, y: 325 }, { x: 170, y: 430 }, { x: 325, y: 430 }] },
       { from: "n_base", to: "cb", current: 0, path: [{ x: 250, y: 215 }, { x: 225, y: 215 }] },
@@ -281,9 +282,9 @@ export function generateSingleTuned(p: Record<string, number | string>): Circuit
       { from: "n_vcc", to: "ct", current: 0, path: [{ x: 325, y: 45 }, { x: 420, y: 45 }, { x: 420, y: 105 }] },
       { from: "ct", to: "n_collector", current: 0, path: [{ x: 420, y: 155 }, { x: 420, y: 165 }, { x: 325, y: 165 }] },
       // Collector to transistor
-      { from: "n_collector", to: "q1", current: round(Ic_actual * 1000), path: [{ x: 325, y: 165 }, { x: 325, y: 210 }] },
+      { from: "n_collector", to: "q1_c", current: round(Ic_actual * 1000), path: [{ x: 325, y: 165 }, { x: 330, y: 165 }, { x: 330, y: 210 }] },
       // Transistor to emitter
-      { from: "q1", to: "n_emitter", current: round(Ic_actual * 1000), path: [{ x: 325, y: 250 }, { x: 325, y: 290 }] },
+      { from: "q1_e", to: "n_emitter", current: round(Ic_actual * 1000), path: [{ x: 330, y: 250 }, { x: 330, y: 290 }, { x: 325, y: 290 }] },
       // Emitter to RE
       { from: "n_emitter", to: "re", current: round(Ic_actual * 1000), path: [{ x: 325, y: 290 }, { x: 325, y: 315 }] },
       { from: "re", to: "n_gnd", current: round(Ic_actual * 1000), path: [{ x: 325, y: 365 }, { x: 325, y: 430 }] },
