@@ -157,8 +157,8 @@ export function generateDarlingtonPair(p: Record<string, number | string>): Circ
       { id: "n_gnd", label: "GND", x: 300, y: 430, voltage: 0, type: "ground" },
     ],
     connections: [
-      { from: "n_vcc", to: "q1", current: round(Ic * 1000 / beta2), path: [{ x: 300, y: 50 }, { x: 300, y: 160 }] },
-      { from: "n_vcc", to: "q2", current: round(Ic * 1000), path: [{ x: 300, y: 50 }, { x: 330, y: 50 }, { x: 330, y: 260 }] },
+      { from: "n_vcc", to: "q1_c", current: round(Ic * 1000 / beta2), path: [{ x: 300, y: 50 }, { x: 300, y: 160 }] },
+      { from: "n_vcc", to: "q2_c", current: round(Ic * 1000), path: [{ x: 300, y: 50 }, { x: 330, y: 50 }, { x: 330, y: 260 }] },
       { from: "n_in", to: "rb", current: round(Ib * 1e6) / 1000, path: [{ x: 50, y: 170 }, { x: 120, y: 170 }] },
       { from: "rb", to: "n_base1", current: round(Ib * 1e6) / 1000, path: [{ x: 165, y: 170 }, { x: 220, y: 170 }] },
       { from: "n_base1", to: "q1_b", current: 0, path: [{ x: 220, y: 170 }, { x: 255, y: 170 }] },
@@ -442,8 +442,8 @@ export function generateMultistageAmplifier(p: Record<string, number | string>):
       // ── Stage 1 power ──
       { from: "n_vcc", to: "rc1", current: round(Ic1_actual * 1000), path: [{ x: s1x + 250, y: 45 }, { x: s1x + 250, y: 95 }] },
       { from: "rc1", to: "n_c1", current: round(Ic1_actual * 1000), path: [{ x: s1x + 250, y: 145 }, { x: s1x + 250, y: 165 }] },
-      { from: "n_c1", to: "q1", current: round(Ic1_actual * 1000), path: [{ x: s1x + 250, y: 165 }, { x: s1x + 250, y: 210 }] },
-      { from: "q1", to: "n_e1", current: round(Ic1_actual * 1000), path: [{ x: s1x + 250, y: 250 }, { x: s1x + 250, y: 290 }] },
+      { from: "n_c1", to: "q1_c", current: round(Ic1_actual * 1000), path: [{ x: s1x + 250, y: 165 }, { x: s1x + 255, y: 165 }, { x: s1x + 255, y: 210 }] },
+      { from: "q1_e", to: "n_e1", current: round(Ic1_actual * 1000), path: [{ x: s1x + 255, y: 250 }, { x: s1x + 255, y: 290 }, { x: s1x + 250, y: 290 }] },
       { from: "n_e1", to: "re1", current: round(Ic1_actual * 1000), path: [{ x: s1x + 250, y: 290 }, { x: s1x + 250, y: 315 }] },
       { from: "re1", to: "n_gnd", current: round(Ic1_actual * 1000), path: [{ x: s1x + 250, y: 365 }, { x: s1x + 250, y: 460 }, { x: 350, y: 460 }] },
       // Stage 1 bias
@@ -464,8 +464,8 @@ export function generateMultistageAmplifier(p: Record<string, number | string>):
       // ── Stage 2 power ──
       { from: "n_vcc", to: "rc2", current: round(Ic2_actual * 1000), path: [{ x: s1x + 250, y: 45 }, { x: s2x + 250, y: 45 }, { x: s2x + 250, y: 95 }] },
       { from: "rc2", to: "n_c2", current: round(Ic2_actual * 1000), path: [{ x: s2x + 250, y: 145 }, { x: s2x + 250, y: 165 }] },
-      { from: "n_c2", to: "q2", current: round(Ic2_actual * 1000), path: [{ x: s2x + 250, y: 165 }, { x: s2x + 250, y: 210 }] },
-      { from: "q2", to: "n_e2", current: round(Ic2_actual * 1000), path: [{ x: s2x + 250, y: 250 }, { x: s2x + 250, y: 290 }] },
+      { from: "n_c2", to: "q2_c", current: round(Ic2_actual * 1000), path: [{ x: s2x + 250, y: 165 }, { x: s2x + 255, y: 165 }, { x: s2x + 255, y: 210 }] },
+      { from: "q2_e", to: "n_e2", current: round(Ic2_actual * 1000), path: [{ x: s2x + 255, y: 250 }, { x: s2x + 255, y: 290 }, { x: s2x + 250, y: 290 }] },
       { from: "n_e2", to: "re2", current: round(Ic2_actual * 1000), path: [{ x: s2x + 250, y: 290 }, { x: s2x + 250, y: 315 }] },
       { from: "re2", to: "n_gnd", current: round(Ic2_actual * 1000), path: [{ x: s2x + 250, y: 365 }, { x: s2x + 250, y: 460 }, { x: 350, y: 460 }] },
       // Stage 2 bias
