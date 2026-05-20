@@ -8,6 +8,7 @@ import { generateHalfWaveRectifier, generateBridgeRectifier, generateSeriesClipp
 import { generateVoltageFollower, generateSummingAmplifier, generateIntegrator, generateDifferentiator } from "./circuit-gen-opamp-ext";
 import { generateBandPassFilter, generateActiveLowPass, generateActiveHighPass, generateWienBridge, generateMonostable555 } from "./circuit-gen-filter-ext";
 import { generateCommonBase, generateDarlingtonPair, generateSingleTuned, generateMultistageAmplifier } from "./circuit-gen-transistor-ext";
+import { generateHartleyOscillator, generateColpittsOscillator, generatePhaseShiftOscillator, generateCrystalOscillator } from "./circuit-gen-oscillator-ext";
 
 export function generateCircuit(intent: ParsedIntent): CircuitSpec {
   switch (intent.circuitType) {
