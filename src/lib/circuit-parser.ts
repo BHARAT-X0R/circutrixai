@@ -163,6 +163,42 @@ const rules: PatternRule[] = [
     defaults: { freq: 1000, opamp: "LM741" },
   },
   {
+    type: "hartley_oscillator",
+    patterns: [/hartley/i],
+    paramExtractors: {
+      freq: /(\d+\.?\d*)\s*(k?hz|mhz)/i,
+      Vcc: /vcc\s*[-=:]?\s*(\d+\.?\d*)/i,
+    },
+    defaults: { freq: 100000, Vcc: 12 },
+  },
+  {
+    type: "colpitts_oscillator",
+    patterns: [/colpitts/i],
+    paramExtractors: {
+      freq: /(\d+\.?\d*)\s*(k?hz|mhz)/i,
+      Vcc: /vcc\s*[-=:]?\s*(\d+\.?\d*)/i,
+    },
+    defaults: { freq: 100000, Vcc: 12 },
+  },
+  {
+    type: "phase_shift_oscillator",
+    patterns: [/phase[\s-]?shift\s*(oscillator)?/i, /rc\s*phase/i],
+    paramExtractors: {
+      freq: /(\d+\.?\d*)\s*(k?hz)/i,
+      Vcc: /vcc\s*[-=:]?\s*(\d+\.?\d*)/i,
+    },
+    defaults: { freq: 1000, Vcc: 12 },
+  },
+  {
+    type: "crystal_oscillator",
+    patterns: [/crystal\s*(oscillator)?/i, /pierce\s*(oscillator)?/i, /xtal/i, /quartz/i],
+    paramExtractors: {
+      freq: /(\d+\.?\d*)\s*(k?hz|mhz)/i,
+      Vcc: /vcc\s*[-=:]?\s*(\d+\.?\d*)/i,
+    },
+    defaults: { freq: 4000000, Vcc: 5 },
+  },
+  {
     type: "monostable_555",
     patterns: [/monostable/i, /one[\s-]?shot/i, /555\s*mono/i],
     paramExtractors: {
