@@ -79,12 +79,13 @@ export function generateCommonBase(p: Record<string, number | string>): CircuitS
     connections: [
       { from: "n_vcc", to: "rc", current: round(Ic_actual * 1000), path: [{ x: 325, y: 45 }, { x: 325, y: 105 }] },
       { from: "rc", to: "n_collector", current: round(Ic_actual * 1000), path: [{ x: 325, y: 155 }, { x: 325, y: 165 }] },
-      { from: "n_collector", to: "q1", current: round(Ic_actual * 1000), path: [{ x: 325, y: 165 }, { x: 325, y: 210 }] },
-      { from: "q1", to: "n_emitter", current: round(Ic_actual * 1000), path: [{ x: 325, y: 250 }, { x: 325, y: 290 }] },
+      { from: "n_collector", to: "q1_c", current: round(Ic_actual * 1000), path: [{ x: 325, y: 165 }, { x: 330, y: 165 }, { x: 330, y: 210 }] },
+      { from: "q1_e", to: "n_emitter", current: round(Ic_actual * 1000), path: [{ x: 330, y: 250 }, { x: 330, y: 290 }, { x: 325, y: 290 }] },
       { from: "n_emitter", to: "re", current: round(Ic_actual * 1000), path: [{ x: 325, y: 290 }, { x: 325, y: 315 }] },
       { from: "re", to: "n_gnd", current: round(Ic_actual * 1000), path: [{ x: 325, y: 365 }, { x: 325, y: 430 }] },
       { from: "n_vcc", to: "r1", current: round(I_divider * 1000), path: [{ x: 325, y: 45 }, { x: 170, y: 45 }, { x: 170, y: 105 }] },
       { from: "r1", to: "n_base", current: round(I_divider * 1000), path: [{ x: 170, y: 155 }, { x: 170, y: 215 }, { x: 250, y: 215 }] },
+      { from: "n_base", to: "q1_b", current: round(Ic_actual / beta * 1000, 4), path: [{ x: 250, y: 215 }, { x: 285, y: 215 }] },
       { from: "n_base", to: "r2", current: round(I_divider * 1000), path: [{ x: 170, y: 215 }, { x: 170, y: 275 }] },
       { from: "r2", to: "n_gnd", current: round(I_divider * 1000), path: [{ x: 170, y: 325 }, { x: 170, y: 430 }, { x: 325, y: 430 }] },
       { from: "n_base", to: "cb", current: 0, path: [{ x: 250, y: 215 }, { x: 225, y: 215 }] },
@@ -156,12 +157,12 @@ export function generateDarlingtonPair(p: Record<string, number | string>): Circ
       { id: "n_gnd", label: "GND", x: 300, y: 430, voltage: 0, type: "ground" },
     ],
     connections: [
-      { from: "n_vcc", to: "q1", current: round(Ic * 1000 / beta2), path: [{ x: 300, y: 50 }, { x: 300, y: 160 }] },
-      { from: "n_vcc", to: "q2", current: round(Ic * 1000), path: [{ x: 300, y: 50 }, { x: 330, y: 50 }, { x: 330, y: 260 }] },
+      { from: "n_vcc", to: "q1_c", current: round(Ic * 1000 / beta2), path: [{ x: 300, y: 50 }, { x: 300, y: 160 }] },
+      { from: "n_vcc", to: "q2_c", current: round(Ic * 1000), path: [{ x: 300, y: 50 }, { x: 330, y: 50 }, { x: 330, y: 260 }] },
       { from: "n_in", to: "rb", current: round(Ib * 1e6) / 1000, path: [{ x: 50, y: 170 }, { x: 120, y: 170 }] },
       { from: "rb", to: "n_base1", current: round(Ib * 1e6) / 1000, path: [{ x: 165, y: 170 }, { x: 220, y: 170 }] },
       { from: "n_base1", to: "q1_b", current: 0, path: [{ x: 220, y: 170 }, { x: 255, y: 170 }] },
-      { from: "q1_e", to: "n_e1_b2", current: round(Ic / beta2 * 1000), path: [{ x: 280, y: 200 }, { x: 280, y: 260 }] },
+      { from: "q1_e", to: "n_e1_b2", current: round(Ic / beta2 * 1000), path: [{ x: 300, y: 200 }, { x: 300, y: 260 }, { x: 280, y: 260 }] },
       { from: "n_e1_b2", to: "q2_b", current: round(Ic / beta2 * 1000), path: [{ x: 280, y: 260 }, { x: 285, y: 270 }] },
       { from: "q2_e", to: "n_emitter2", current: round(Ic * 1000), path: [{ x: 330, y: 300 }, { x: 330, y: 340 }] },
       { from: "n_emitter2", to: "re", current: round(Ic * 1000), path: [{ x: 330, y: 340 }, { x: 330, y: 345 }] },
@@ -278,12 +279,12 @@ export function generateSingleTuned(p: Record<string, number | string>): Circuit
       // Inductor to collector
       { from: "l1", to: "n_collector", current: round(Ic_actual * 1000), path: [{ x: 325, y: 135 }, { x: 325, y: 165 }] },
       // Tank capacitor in parallel with inductor
-      { from: "n_vcc", to: "ct", current: 0, path: [{ x: 325, y: 45 }, { x: 420, y: 45 }, { x: 420, y: 105 }] },
-      { from: "ct", to: "n_collector", current: 0, path: [{ x: 420, y: 155 }, { x: 420, y: 165 }, { x: 325, y: 165 }] },
+      { from: "n_vcc", to: "ct", current: 0, path: [{ x: 325, y: 45 }, { x: 420, y: 45 }, { x: 420, y: 115 }] },
+      { from: "ct", to: "n_collector", current: 0, path: [{ x: 420, y: 145 }, { x: 420, y: 165 }, { x: 325, y: 165 }] },
       // Collector to transistor
-      { from: "n_collector", to: "q1", current: round(Ic_actual * 1000), path: [{ x: 325, y: 165 }, { x: 325, y: 210 }] },
+      { from: "n_collector", to: "q1_c", current: round(Ic_actual * 1000), path: [{ x: 325, y: 165 }, { x: 330, y: 165 }, { x: 330, y: 210 }] },
       // Transistor to emitter
-      { from: "q1", to: "n_emitter", current: round(Ic_actual * 1000), path: [{ x: 325, y: 250 }, { x: 325, y: 290 }] },
+      { from: "q1_e", to: "n_emitter", current: round(Ic_actual * 1000), path: [{ x: 330, y: 250 }, { x: 330, y: 290 }, { x: 325, y: 290 }] },
       // Emitter to RE
       { from: "n_emitter", to: "re", current: round(Ic_actual * 1000), path: [{ x: 325, y: 290 }, { x: 325, y: 315 }] },
       { from: "re", to: "n_gnd", current: round(Ic_actual * 1000), path: [{ x: 325, y: 365 }, { x: 325, y: 430 }] },
@@ -300,8 +301,8 @@ export function generateSingleTuned(p: Record<string, number | string>): Circuit
       { from: "n_collector", to: "c2", current: 0, path: [{ x: 325, y: 165 }, { x: 515, y: 165 }] },
       { from: "c2", to: "n_output", current: 0, path: [{ x: 545, y: 165 }, { x: 580, y: 165 }] },
       // Bypass cap
-      { from: "n_emitter", to: "ce", current: 0, path: [{ x: 325, y: 290 }, { x: 430, y: 290 }, { x: 430, y: 315 }] },
-      { from: "ce", to: "n_gnd", current: 0, path: [{ x: 430, y: 365 }, { x: 430, y: 430 }, { x: 325, y: 430 }] },
+      { from: "n_emitter", to: "ce", current: 0, path: [{ x: 325, y: 290 }, { x: 430, y: 290 }, { x: 430, y: 325 }] },
+      { from: "ce", to: "n_gnd", current: 0, path: [{ x: 430, y: 355 }, { x: 430, y: 430 }, { x: 325, y: 430 }] },
     ],
     analysis: {
       dcOperatingPoint: [
@@ -441,8 +442,8 @@ export function generateMultistageAmplifier(p: Record<string, number | string>):
       // ── Stage 1 power ──
       { from: "n_vcc", to: "rc1", current: round(Ic1_actual * 1000), path: [{ x: s1x + 250, y: 45 }, { x: s1x + 250, y: 95 }] },
       { from: "rc1", to: "n_c1", current: round(Ic1_actual * 1000), path: [{ x: s1x + 250, y: 145 }, { x: s1x + 250, y: 165 }] },
-      { from: "n_c1", to: "q1", current: round(Ic1_actual * 1000), path: [{ x: s1x + 250, y: 165 }, { x: s1x + 250, y: 210 }] },
-      { from: "q1", to: "n_e1", current: round(Ic1_actual * 1000), path: [{ x: s1x + 250, y: 250 }, { x: s1x + 250, y: 290 }] },
+      { from: "n_c1", to: "q1_c", current: round(Ic1_actual * 1000), path: [{ x: s1x + 250, y: 165 }, { x: s1x + 255, y: 165 }, { x: s1x + 255, y: 210 }] },
+      { from: "q1_e", to: "n_e1", current: round(Ic1_actual * 1000), path: [{ x: s1x + 255, y: 250 }, { x: s1x + 255, y: 290 }, { x: s1x + 250, y: 290 }] },
       { from: "n_e1", to: "re1", current: round(Ic1_actual * 1000), path: [{ x: s1x + 250, y: 290 }, { x: s1x + 250, y: 315 }] },
       { from: "re1", to: "n_gnd", current: round(Ic1_actual * 1000), path: [{ x: s1x + 250, y: 365 }, { x: s1x + 250, y: 460 }, { x: 350, y: 460 }] },
       // Stage 1 bias
@@ -455,16 +456,16 @@ export function generateMultistageAmplifier(p: Record<string, number | string>):
       { from: "n_input", to: "c1", current: 0, path: [{ x: s1x + 10, y: 215 }, { x: s1x + 25, y: 215 }] },
       { from: "c1", to: "n_b1", current: 0, path: [{ x: s1x + 55, y: 215 }, { x: s1x + 120, y: 215 }] },
       // Stage 1 bypass
-      { from: "n_e1", to: "ce1", current: 0, path: [{ x: s1x + 250, y: 290 }, { x: s1x + 340, y: 290 }, { x: s1x + 340, y: 315 }] },
-      { from: "ce1", to: "n_gnd", current: 0, path: [{ x: s1x + 340, y: 365 }, { x: s1x + 340, y: 460 }, { x: 350, y: 460 }] },
+      { from: "n_e1", to: "ce1", current: 0, path: [{ x: s1x + 250, y: 290 }, { x: s1x + 340, y: 290 }, { x: s1x + 340, y: 325 }] },
+      { from: "ce1", to: "n_gnd", current: 0, path: [{ x: s1x + 340, y: 355 }, { x: s1x + 340, y: 460 }, { x: 350, y: 460 }] },
       // ── Coupling between stages ──
       { from: "n_c1", to: "cc", current: 0, path: [{ x: s1x + 250, y: 165 }, { x: s1x + 310, y: 165 }] },
       { from: "cc", to: "n_b2", current: 0, path: [{ x: s1x + 340, y: 165 }, { x: s2x + 120, y: 165 }, { x: s2x + 120, y: 215 }] },
       // ── Stage 2 power ──
       { from: "n_vcc", to: "rc2", current: round(Ic2_actual * 1000), path: [{ x: s1x + 250, y: 45 }, { x: s2x + 250, y: 45 }, { x: s2x + 250, y: 95 }] },
       { from: "rc2", to: "n_c2", current: round(Ic2_actual * 1000), path: [{ x: s2x + 250, y: 145 }, { x: s2x + 250, y: 165 }] },
-      { from: "n_c2", to: "q2", current: round(Ic2_actual * 1000), path: [{ x: s2x + 250, y: 165 }, { x: s2x + 250, y: 210 }] },
-      { from: "q2", to: "n_e2", current: round(Ic2_actual * 1000), path: [{ x: s2x + 250, y: 250 }, { x: s2x + 250, y: 290 }] },
+      { from: "n_c2", to: "q2_c", current: round(Ic2_actual * 1000), path: [{ x: s2x + 250, y: 165 }, { x: s2x + 255, y: 165 }, { x: s2x + 255, y: 210 }] },
+      { from: "q2_e", to: "n_e2", current: round(Ic2_actual * 1000), path: [{ x: s2x + 255, y: 250 }, { x: s2x + 255, y: 290 }, { x: s2x + 250, y: 290 }] },
       { from: "n_e2", to: "re2", current: round(Ic2_actual * 1000), path: [{ x: s2x + 250, y: 290 }, { x: s2x + 250, y: 315 }] },
       { from: "re2", to: "n_gnd", current: round(Ic2_actual * 1000), path: [{ x: s2x + 250, y: 365 }, { x: s2x + 250, y: 460 }, { x: 350, y: 460 }] },
       // Stage 2 bias
@@ -474,8 +475,8 @@ export function generateMultistageAmplifier(p: Record<string, number | string>):
       { from: "n_b2", to: "r2b", current: round(I_div2 * 1000), path: [{ x: s2x + 120, y: 215 }, { x: s2x + 120, y: 275 }] },
       { from: "r2b", to: "n_gnd", current: round(I_div2 * 1000), path: [{ x: s2x + 120, y: 325 }, { x: s2x + 120, y: 460 }, { x: 350, y: 460 }] },
       // Stage 2 bypass
-      { from: "n_e2", to: "ce2", current: 0, path: [{ x: s2x + 250, y: 290 }, { x: s2x + 340, y: 290 }, { x: s2x + 340, y: 315 }] },
-      { from: "ce2", to: "n_gnd", current: 0, path: [{ x: s2x + 340, y: 365 }, { x: s2x + 340, y: 460 }, { x: 350, y: 460 }] },
+      { from: "n_e2", to: "ce2", current: 0, path: [{ x: s2x + 250, y: 290 }, { x: s2x + 340, y: 290 }, { x: s2x + 340, y: 325 }] },
+      { from: "ce2", to: "n_gnd", current: 0, path: [{ x: s2x + 340, y: 355 }, { x: s2x + 340, y: 460 }, { x: 350, y: 460 }] },
       // Stage 2 output coupling
       { from: "n_c2", to: "c2", current: 0, path: [{ x: s2x + 250, y: 165 }, { x: s2x + 315, y: 165 }] },
       { from: "c2", to: "n_output", current: 0, path: [{ x: s2x + 345, y: 165 }, { x: s2x + 400, y: 165 }] },
