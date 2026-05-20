@@ -51,7 +51,7 @@ const rules: PatternRule[] = [
   },
   {
     type: "bridge_rectifier",
-    patterns: [/bridge\s*(rectifier)?/i, /full[\s-]?wave\s*(bridge|rectifier)/i],
+    patterns: [/bridge\s*rectifier/i, /full[\s-]?wave\s*(bridge|rectifier)/i],
     paramExtractors: {
       Vin: /(\d+\.?\d*)\s*v\s*(rms|ac|input|in)?/i,
       RL: /(\d+\.?\d*)\s*(k?Ω|kohm|ohm)?\s*(load)?/i,
@@ -215,7 +215,7 @@ const rules: PatternRule[] = [
   },
   {
     type: "inverting_opamp",
-    patterns: [/inverting\s*(op[\s-]?amp|amplifier)/i, /inv\s*opamp/i],
+    patterns: [/(^|[^\w-])inverting\s*(op[\s-]?amp|amplifier)/i, /(^|[^\w-])inv\s*opamp/i],
     paramExtractors: {
       gain: /gain\s*[-=:]?\s*-?(\d+\.?\d*)/i,
       opamp: /(lm741|tl071|tl072|lm358|op07|ne5532)/i,

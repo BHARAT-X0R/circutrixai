@@ -14,7 +14,7 @@ export function generateVoltageFollower(p: Record<string, number | string>): Cir
       { id: "gnd", type: "ground", label: "GND", value: "0", unit: "V", x: 280, y: 380 },
     ],
     nodes: [
-      { id: "n_in", label: "Vin", x: 50, y: 200, voltage: 0, type: "input" },
+      { id: "n_in", label: "Vin", x: 50, y: 240, voltage: 0, type: "input" },
       { id: "n_ninv", label: "V+", x: 280, y: 240, voltage: 0, type: "internal" },
       { id: "n_inv", label: "V−", x: 280, y: 200, voltage: 0, type: "internal" },
       { id: "n_out", label: "Vout", x: 500, y: 220, voltage: 0, type: "output" },

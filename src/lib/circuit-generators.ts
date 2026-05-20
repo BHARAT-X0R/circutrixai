@@ -509,7 +509,7 @@ function generateCCAmplifier(p: Record<string, number | string>): CircuitSpec {
       { from: "re", to: "n_gnd", current: Ic * 1000, path: [{ x: 300, y: 355 }, { x: 300, y: 430 }] },
       { from: "n_in", to: "c1", current: 0, path: [{ x: 30, y: 210 }, { x: 55, y: 210 }] },
       { from: "c1", to: "n_base", current: 0, path: [{ x: 85, y: 210 }, { x: 160, y: 210 }] },
-      { from: "n_emitter", to: "c2", current: 0, path: [{ x: 300, y: 280 }, { x: 415, y: 280 }, { x: 415, y: 290 }] },
+      { from: "n_emitter", to: "c2", current: 0, path: [{ x: 300, y: 280 }, { x: 425, y: 280 }, { x: 425, y: 290 }] },
       { from: "c2", to: "n_out", current: 0, path: [{ x: 455, y: 290 }, { x: 520, y: 290 }] },
     ],
     analysis: {
