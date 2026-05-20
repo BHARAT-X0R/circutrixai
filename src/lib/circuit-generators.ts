@@ -54,6 +54,14 @@ export function generateCircuit(intent: ParsedIntent): CircuitSpec {
       return generateMonostable555(intent.params);
     case "wien_bridge_oscillator":
       return generateWienBridge(intent.params);
+    case "hartley_oscillator":
+      return generateHartleyOscillator(intent.params);
+    case "colpitts_oscillator":
+      return generateColpittsOscillator(intent.params);
+    case "phase_shift_oscillator":
+      return generatePhaseShiftOscillator(intent.params);
+    case "crystal_oscillator":
+      return generateCrystalOscillator(intent.params);
     case "half_wave_rectifier":
       return generateHalfWaveRectifier(intent.params);
     case "bridge_rectifier":
