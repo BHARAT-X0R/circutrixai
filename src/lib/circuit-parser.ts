@@ -302,6 +302,18 @@ function extractPulseWidth(prompt: string): number | null {
   return null;
 }
 
+function extractLoadResistance(prompt: string): number | null {
+  const loadFirst = prompt.match(/(?:load|rl)\s*[-=:]?\s*(\d+\.?\d*)\s*(k?Ω|kohm|ohm)?/i);
+  const valueFirst = prompt.match(/(\d+\.?\d*)\s*(k?Ω|kohm|ohm)\s*(?:load|rl)?/i);
+  const match = loadFirst || valueFirst;
+  if (!match) return null;
+
+  let value = parseFloat(match[1]);
+  const unit = match[2] || "";
+  if (/k/i.test(unit)) value *= 1000;
+  return value;
+}
+
 export function parsePrompt(prompt: string): ParsedIntent {
   for (const rule of rules) {
     const matched = rule.patterns.some((p) => p.test(prompt));
@@ -321,9 +333,8 @@ export function parsePrompt(prompt: string): ParsedIntent {
         } else if (key === "opamp") {
           params[key] = m[1].toUpperCase();
         } else if (key === "RL") {
-          let val = parseFloat(m[1]);
-          if (m[2] && /k/i.test(m[2])) val *= 1000;
-          params[key] = val;
+          const resistance = extractLoadResistance(prompt);
+          if (resistance) params[key] = resistance;
         } else if (key === "Iload") {
           const val = parseFloat(m[1]);
           params[key] = val;
